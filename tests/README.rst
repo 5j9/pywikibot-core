@@ -198,9 +198,6 @@ CircleCI Ubuntu servers.
 
 PYWIKIBOT2_NO_USER_CONFIG=2 is needed because 'python setup.py test' is run.
 
-TOXENV=py27,py34 is a workaround because CircleCI runs 'tox',
-but there is a bug in the CircleCI default 'py26' implementation.
-
 This approach does not include 'user' tests.
 
 Environment variables

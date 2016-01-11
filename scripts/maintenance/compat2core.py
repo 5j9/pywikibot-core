@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-A helper script to convert compat 1.0 scripts to the new core 3.0 framework.
+A helper script to convert compat 1.0 scripts to the new core 3+ framework.
 
 NOTE: Please be aware that this script is not able to convert your codes
 completely. It may support you with some automatic replacements and it gives
@@ -26,8 +26,8 @@ to show warnings about deprecated methods:
     python pwb.py compat2core <scriptname> -warnonly
 """
 #
-# (C) xqt, 2014-2017
-# (C) Pywikibot team, 2014-2017
+# (C) xqt, 2014-2018
+# (C) Pywikibot team, 2014-2018
 #
 # Distributed under the terms of the MIT license.
 #

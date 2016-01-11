@@ -7,7 +7,7 @@
 #
 from __future__ import absolute_import, unicode_literals
 
-__release__ = '3.0-dev'
+__release__ = '3.1-dev'
 __url__ = 'https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Pywikibot'
 
 import atexit
@@ -135,9 +135,9 @@ deprecated = redirect_func(__deprecated)
 deprecate_arg = redirect_func(_deprecate_arg)
 
 
-if sys.version_info[:2] in ((2, 6), (3, 3)):
+if sys.version_info[:2] == (3, 3):
     warn(
-        'Pywikibot will soon drop support for Python 2.6 and 3.3',
+        'Pywikibot will soon drop support for Python 3.3',
         DeprecationWarning,
     )
 

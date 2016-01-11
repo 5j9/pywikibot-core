@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Classes for detecting a MediaWiki site."""
 #
-# (C) Pywikibot team, 2010-2015
+# (C) Pywikibot team, 2010-2016
 #
 # Distributed under the terms of the MIT license.
 #
@@ -22,9 +22,9 @@ if not PY2:
     from html.parser import HTMLParser
     from urllib.parse import urljoin, urlparse
 else:
-    try:
+    if PYTHON_VERSION == (2, 7, 2):
         from future.backports.html.parser import HTMLParser
-    except ImportError:
+    else:
         from HTMLParser import HTMLParser
     from urlparse import urljoin, urlparse
 
