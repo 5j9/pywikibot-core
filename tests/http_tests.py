@@ -49,15 +49,7 @@ class HttpsCertificateTestCase(TestCase):
         http.session.close()  # clear the connection
 
         import warnings
-        import traceback
-
-        _old_warn = warnings.warn
-        def warn(*args, **kwargs):
-            tb = traceback.extract_stack()
-            _old_warn(*args, **kwargs)
-            print("".join(traceback.format_list(tb)[:-1]))
-
-        warnings.warn = warn
+        warnings.filterwarnings('error', category=ResourceWarning)
 
         with warnings.catch_warnings(record=True) as warning_log:
             response = http.fetch(
