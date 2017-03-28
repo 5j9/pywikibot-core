@@ -524,24 +524,24 @@ class CheckHostnameMixin(TestCaseBase):
                     continue
 
             e = None
+            if '://' not in hostname:
+                hostname = 'http://' + hostname
             try:
-                if '://' not in hostname:
-                    hostname = 'http://' + hostname
                 r = http.fetch(uri=hostname,
                                method='HEAD',
                                default_error_handling=False)
-                http.session.close()  # clear the connection
-                if r.exception:
-                    e = r.exception
-                else:
-                    if r.status not in [200, 301, 302, 303, 307, 308]:
-                        raise ServerError('HTTP status: %d' % r.status)
             except Exception as e2:
                 pywikibot.error('%s: accessing %s caused exception:'
                                 % (cls.__name__, hostname))
                 pywikibot.exception(e2, tb=True)
                 e = e2
-                pass
+            else:
+                if r.exception:
+                    e = r.exception
+                else:
+                    if r.status not in [200, 301, 302, 303, 307, 308]:
+                        raise ServerError('HTTP status: %d' % r.status)
+            http.session.close()  # clear the connection
 
             if e:
                 cls._checked_hostnames[hostname] = e
