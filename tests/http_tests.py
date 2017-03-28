@@ -63,7 +63,8 @@ class HttpsCertificateTestCase(TestCase):
                                uri='https://testssl-expire-r2i2.disig.sk/index.en.html')
         http.session.close()  # clear the connection
 
-        print('>>>>>>>>>>>>>', [wl.__dict__ for wl in warning_log])
+        from pprint import pprint
+        pprint([wl.__dict__ for wl in warning_log])
         # Verify that the warning occurred
         self.assertEqual(len(warning_log), 1)
         self.assertEqual(warning_log[0].category.__name__,
