@@ -51,15 +51,13 @@ class HttpsCertificateTestCase(TestCase):
         import warnings
         import traceback
 
-        _formatwarning = warnings.formatwarning
+        _old_warn = warnings.warn
+        def warn(*args, **kwargs):
+            tb = traceback.extract_stack()
+            _old_warn(*args, **kwargs)
+            print("".join(traceback.format_list(tb)[:-1]))
 
-        def formatwarning_tb(*args, **kwargs):
-            s = _formatwarning(*args, **kwargs)
-            tb = traceback.format_stack()
-            s += ''.join(tb[:-1])
-            return s
-
-        warnings.formatwarning = formatwarning_tb
+        warnings.warn = warn
 
         with warnings.catch_warnings(record=True) as warning_log:
             response = http.fetch(
@@ -78,6 +76,8 @@ class HttpsCertificateTestCase(TestCase):
         http.session.close()  # clear the connection
 
         # Verify that the warning occurred
+        from pprint import pprint
+        pprint([w.__dict__ for w in warning_log])
         self.assertEqual(len(warning_log), 1)
         self.assertEqual(warning_log[0].category.__name__,
                          'InsecureRequestWarning')
