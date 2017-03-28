@@ -47,6 +47,7 @@ class HttpsCertificateTestCase(TestCase):
                                http.fetch,
                                uri='https://testssl-expire-r2i2.disig.sk/index.en.html')
         http.session.close()  # clear the connection
+        warnings.simplefilter('error')
 
         with warnings.catch_warnings(record=True) as warning_log:
             response = http.fetch(
@@ -63,7 +64,6 @@ class HttpsCertificateTestCase(TestCase):
                                uri='https://testssl-expire-r2i2.disig.sk/index.en.html')
         http.session.close()  # clear the connection
 
-        warnings.simplefilter('raise')
         # Verify that the warning occurred
         self.assertEqual(len(warning_log), 1)
         self.assertEqual(warning_log[0].category.__name__,
