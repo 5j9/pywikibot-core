@@ -383,8 +383,6 @@ def _http_process(session, http_request):
         http_request.data = e
     else:
         http_request.data = response
-    import warnings
-    warnings.simplefilter('error')
 
 
 def error_handling_callback(request):
@@ -412,7 +410,8 @@ def error_handling_callback(request):
     # HTTP status 207 is also a success status for Webdav FINDPROP,
     # used by the version module.
     if request.status not in (200, 207):
-        warning('Http response status {0}'.format(request.data.status_code))
+        # warning('Http response status {0}'.format(request.data.status_code))
+        pass
 
 
 def _enqueue(uri, method="GET", params=None, body=None, headers=None, data=None,
