@@ -371,6 +371,8 @@ def _http_process(session, http_request):
             auth = requests_oauthlib.OAuth1(*auth)
     timeout = config.socket_timeout
     try:
+        import warnings
+        warnings.simplefilter('default')
         ignore_validation = http_request.kwargs.pop(
             'disable_ssl_certificate_validation', False)
         # Note that the connections are pooled which mean that a future
@@ -379,6 +381,7 @@ def _http_process(session, http_request):
         response = session.request(method, uri, params=params, data=body,
                                    headers=headers, auth=auth, timeout=timeout,
                                    verify=not ignore_validation)
+        warnings.simplefilter('error')
     except Exception as e:
         http_request.data = e
     else:

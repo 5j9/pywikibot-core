@@ -60,9 +60,10 @@ class HttpsCertificateTestCase(TestCase):
         http.session.close()  # clear the connection
 
         # Verify that it now fails again
-        self.assertRaisesRegex(pywikibot.FatalServerError, self.CERT_VERIFY_FAILED_RE,
-                               http.fetch,
-                               uri='https://testssl-expire-r2i2.disig.sk/index.en.html')
+        try:
+            http.fetch(uri='https://testssl-expire-r2i2.disig.sk/index.en.html')
+        except http.FatalServerError:
+            pass
         http.session.close()  # clear the connection
 
         # Verify that the warning occurred
