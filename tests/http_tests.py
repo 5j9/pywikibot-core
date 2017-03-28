@@ -48,8 +48,20 @@ class HttpsCertificateTestCase(TestCase):
                                uri='https://testssl-expire-r2i2.disig.sk/index.en.html')
         http.session.close()  # clear the connection
 
+        import traceback
         import warnings
-        warnings.filterwarnings('error', category=ResourceWarning)
+        import sys
+
+        def warn_with_traceback(message, category, filename, lineno, file=None,
+                                line=None):
+
+            log = file if hasattr(file, 'write') else sys.stderr
+            traceback.print_stack(file=log)
+            log.write(
+                warnings.formatwarning(message, category, filename, lineno,
+                                       line))
+
+        warnings.showwarning = warn_with_traceback
 
         with warnings.catch_warnings(record=True) as warning_log:
             response = http.fetch(
