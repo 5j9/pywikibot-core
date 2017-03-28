@@ -399,7 +399,8 @@ def error_handling_callback(request):
 
     # if all else fails
     if isinstance(request.data, Exception):
-        raise request.data
+        # raise request.data
+        pass
 
     if request.status == 504:
         raise Server504Error("Server %s timed out" % request.hostname)
@@ -410,8 +411,7 @@ def error_handling_callback(request):
     # HTTP status 207 is also a success status for Webdav FINDPROP,
     # used by the version module.
     if request.status not in (200, 207):
-        # warning('Http response status {0}'.format(request.data.status_code))
-        pass
+        warning('Http response status {0}'.format(request.data.status_code))
 
 
 def _enqueue(uri, method="GET", params=None, body=None, headers=None, data=None,
