@@ -47,7 +47,6 @@ class HttpsCertificateTestCase(TestCase):
                                http.fetch,
                                uri='https://testssl-expire-r2i2.disig.sk/index.en.html')
         http.session.close()  # clear the connection
-        warnings.simplefilter('error')
 
         with warnings.catch_warnings(record=True) as warning_log:
             response = http.fetch(

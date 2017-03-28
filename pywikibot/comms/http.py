@@ -383,6 +383,8 @@ def _http_process(session, http_request):
         http_request.data = e
     else:
         http_request.data = response
+    import warnings
+    warnings.simplefilter('error')
 
 
 def error_handling_callback(request):
