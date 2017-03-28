@@ -530,6 +530,7 @@ class CheckHostnameMixin(TestCaseBase):
                 r = http.fetch(uri=hostname,
                                method='HEAD',
                                default_error_handling=False)
+                http.session.close()  # clear the connection
                 if r.exception:
                     e = r.exception
                 else:
