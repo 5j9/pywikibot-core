@@ -400,7 +400,7 @@ def error_handling_callback(request):
     # if all else fails
     if isinstance(request.data, Exception):
         # raise request.data
-        pass
+        return
 
     if request.status == 504:
         raise Server504Error("Server %s timed out" % request.hostname)
