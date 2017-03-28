@@ -541,7 +541,8 @@ class CheckHostnameMixin(TestCaseBase):
                 else:
                     if r.status not in [200, 301, 302, 303, 307, 308]:
                         raise ServerError('HTTP status: %d' % r.status)
-            http.session.close()  # clear the connection
+            finally:
+                http.session.close()  # clear the connection
 
             if e:
                 cls._checked_hostnames[hostname] = e
