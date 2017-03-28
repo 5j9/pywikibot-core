@@ -49,7 +49,18 @@ class HttpsCertificateTestCase(TestCase):
         http.session.close()  # clear the connection
 
         import warnings
-        warnings.filterwarnings('error', category=ResourceWarning)
+        import traceback
+
+        _formatwarning = warnings.formatwarning
+
+        def formatwarning_tb(*args, **kwargs):
+            s = _formatwarning(*args, **kwargs)
+            tb = traceback.format_stack()
+            s += ''.join(tb[:-1])
+            return s
+
+        warnings.formatwarning = formatwarning_tb
+
         with warnings.catch_warnings(record=True) as warning_log:
             response = http.fetch(
                 uri='https://testssl-expire-r2i2.disig.sk/index.en.html',
