@@ -489,6 +489,10 @@ def fetch(uri, method="GET", params=None, body=None, headers=None,
     """
     # body and data parameters both map to the data parameter of
     # requests.Session.request.
+    # import traceback
+    # print('--------------')
+    # for line in traceback.format_stack():
+    #     print(line.strip())
     if data:
         body = data
 

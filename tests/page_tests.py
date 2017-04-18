@@ -567,10 +567,7 @@ class TestPageDeprecation(DefaultSiteTestCase, DeprecationTestCase):
                           mainpage.oldest_revision.timestamp.isoformat()))
         self.assertIsInstance(creator[0], unicode)
         self.assertIsInstance(creator[1], unicode)
-        from pywikibot.comms.http import session
-        session.close()
         self.assertDeprecation()
-
         self._reset_messages()
         if MediaWikiVersion(self.site.version()) >= MediaWikiVersion('1.16'):
             self.assertIsInstance(mainpage.previous_revision_id, int)
