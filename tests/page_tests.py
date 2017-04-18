@@ -560,11 +560,13 @@ class TestPageDeprecation(DefaultSiteTestCase, DeprecationTestCase):
 
     def test_creator(self):
         """Test getCreator."""
-        mainpage = self.get_mainpage()
-        creator = mainpage.getCreator()
-        self.assertEqual(creator,
-                         (mainpage.oldest_revision.user,
-                          mainpage.oldest_revision.timestamp.isoformat()))
+        from pywikibot.comms.http import session
+        with session:
+            mainpage = self.get_mainpage()
+            creator = mainpage.getCreator()
+            self.assertEqual(creator,
+                             (mainpage.oldest_revision.user,
+                              mainpage.oldest_revision.timestamp.isoformat()))
         self.assertIsInstance(creator[0], unicode)
         self.assertIsInstance(creator[1], unicode)
         self.assertDeprecation()
