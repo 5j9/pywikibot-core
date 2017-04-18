@@ -24,6 +24,7 @@ import pywikibot.page
 from pywikibot import config
 from pywikibot import InvalidTitle
 
+from pywikibot.comms.http import fetch, session
 from pywikibot.tools import (
     MediaWikiVersion,
     PY2,
@@ -40,6 +41,12 @@ from tests.aspects import (
 EMPTY_TITLE_RE = r'Title must be specified and not empty if source is a Site\.'
 INVALID_TITLE_RE = r'The link does not contain a page title'
 NO_PAGE_RE = r"doesn't exist\."
+
+
+def fetch_and_close_session(*args, **kwargs):
+    """Close session after fetching."""
+    with session:
+        return fetch(*args, **kwargs)
 
 
 class TestLinkObject(SiteAttributeTestCase):
@@ -558,15 +565,14 @@ class TestPageDeprecation(DefaultSiteTestCase, DeprecationTestCase):
 
     """Test deprecation of Page attributes."""
 
+    @mock.patch.object(pywikibot.comms.http, 'fetch', fetch_and_close_session)
     def test_creator(self):
         """Test getCreator."""
-        from pywikibot.comms.http import session
-        with session:
-            mainpage = self.get_mainpage()
-            creator = mainpage.getCreator()
-            self.assertEqual(creator,
-                             (mainpage.oldest_revision.user,
-                              mainpage.oldest_revision.timestamp.isoformat()))
+        mainpage = self.get_mainpage()
+        creator = mainpage.getCreator()
+        self.assertEqual(creator,
+                         (mainpage.oldest_revision.user,
+                          mainpage.oldest_revision.timestamp.isoformat()))
         self.assertIsInstance(creator[0], unicode)
         self.assertIsInstance(creator[1], unicode)
         self.assertDeprecation()
