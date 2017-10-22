@@ -132,8 +132,8 @@ env:
 matrix:
   include:
     - python: '2.7_with_system_site_packages'  # equivalent to virtualenv: system_site_packages: true
-      env: LANGUAGE=he FAMILY=wikivoyage DIST=precise-sudo PYWIKIBOT2_TEST_NO_RC=1
-      dist: precise
+      env: LANGUAGE=he FAMILY=wikivoyage DIST=trusty-sudo PYWIKIBOT2_TEST_NO_RC=1
+      dist: artful
       sudo: required
       addons:
         apt:
