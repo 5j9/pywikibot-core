@@ -25,6 +25,7 @@ addons:
       - liblua5.1-0-dev
 
 before_install:
+  - if [[ "$DIST" == "precise-sudo" ]]; then pip install 'cryptography<2.0'; fi  # T178777
   # When PYSETUP_TEST_EXTRAS is not enabled, do not allow the
   # default 'install' step to install all dependencies listed in
   # requirements.txt to verify that a minimal install works as expected.
