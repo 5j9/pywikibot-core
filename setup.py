@@ -71,7 +71,7 @@ if PY2:
     extra_deps.update({
         'csv': [csv_dep],
         'MySQL': ['oursql'],
-        'unicode7': ['unicodedata2>=7.0.0-2'],
+        'unicode7': ['unicodedata2==10.0.0'],
     })
 elif PYTHON_VERSION[:2] == (3, 3):
     # requests[security] requires cryptography, but cryptography does not
