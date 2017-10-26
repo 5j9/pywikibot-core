@@ -1377,7 +1377,7 @@ class WikidataTestCase(WikibaseTestCase):
     family = 'wikidata'
     code = 'wikidata'
 
-    cached = True
+    cached = False
 
 
 class DefaultWikidataClientTestCase(DefaultWikibaseClientTestCase):

@@ -71,7 +71,7 @@ if PY2:
     extra_deps.update({
         'csv': [csv_dep],
         'MySQL': ['oursql'],
-        'unicode7': ['unicodedata2>=7.0.0-2'],
+        # 'unicode7': ['unicodedata2>=7.0.0-2'], T178969
     })
 elif PYTHON_VERSION[:2] == (3, 3):
     # requests[security] requires cryptography, but cryptography does not
@@ -125,7 +125,7 @@ if sys.version_info[0] == 2:
         script_deps['replicate_wiki.py'] = ['argparse']
         dependencies.append('future>=0.15.0')  # provides collections backports
 
-        dependencies += extra_deps['unicode7']  # T102461 workaround
+        # dependencies += extra_deps['unicode7']  # T102461 workaround, T178969
 
     # tools.ip does not have a hard dependency on an IP address module,
     # as it falls back to using regexes if one is not available.

@@ -1243,7 +1243,7 @@ class TestFactoryGeneratorWikibase(WikidataTestCase):
         self.assertEqual(page1.title(), 'Q169889')
         # ABC disambiguation
         page2 = next(gen)
-        self.assertEqual(page2.title(), 'Q286874')
+        self.assertEqual(page2.title(), 'Q781365')
 
     def test_get_category_site(self):
         """Test the getCategory method."""
