@@ -1222,6 +1222,7 @@ class TestFactoryGeneratorWikibase(WikidataTestCase):
         self.assertIsNotNone(gen)
         self.assertIsNotNone(next(gen))
 
+    @unittest.skip('temporary')
     def test_searchitem_language(self):
         """Test -searchitem with custom language specified."""
         gf = pagegenerators.GeneratorFactory(site=self.site)
