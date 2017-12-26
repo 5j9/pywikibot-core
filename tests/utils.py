@@ -225,26 +225,26 @@ class WarningSourceSkipContextManager(warnings.catch_warnings):
             skip_lines = 0
             entry_line_found = False
 
-            for (_, filename, fileno, _, line, _) in inspect.stack():
-                if any(start <= fileno <= end
-                       for (_, skip_filename, start, end) in self.skip_list
-                       if skip_filename == filename):
-                    if entry_line_found:
-                        continue
-                    else:
-                        skip_lines += 1
-
-                if (filename, fileno) == (entry.filename, entry.lineno):
-                    if not skip_lines:
-                        break
-                    entry_line_found = True
-
-                if entry_line_found:
-                    if not skip_lines:
-                        (entry.filename, entry.lineno) = (filename, fileno)
-                        break
-                    else:
-                        skip_lines -= 1
+            # for (_, filename, fileno, _, line, _) in inspect.stack():
+            #     if any(start <= fileno <= end
+            #            for (_, skip_filename, start, end) in self.skip_list
+            #            if skip_filename == filename):
+            #         if entry_line_found:
+            #             continue
+            #         else:
+            #             skip_lines += 1
+            #
+            #     if (filename, fileno) == (entry.filename, entry.lineno):
+            #         if not skip_lines:
+            #             break
+            #         entry_line_found = True
+            #
+            #     if entry_line_found:
+            #         if not skip_lines:
+            #             (entry.filename, entry.lineno) = (filename, fileno)
+            #             break
+            #         else:
+            #             skip_lines -= 1
 
             # Avoid failures because cryptography is mentioning Python 2.6
             # is outdated
