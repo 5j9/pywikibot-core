@@ -55,7 +55,7 @@ from locale import getdefaultlocale
 
 from requests import __version__ as requests_version
 
-from warnings import warn
+from warnings import filters as _warn_filters, filterwarnings, warn
 
 from pywikibot.logging import error, output, warning
 from pywikibot.tools import PY2
@@ -84,6 +84,45 @@ class _ConfigurationDeprecationWarning(UserWarning):
     """Feature that is no longer supported."""
 
     pass
+
+
+class _Config2(object):
+    """Class to replace config2 module in sys.modules.
+
+    Use for deprecating configs or run routines upon attribute changes.
+    """
+
+    def __init__(self):
+        # cleanup all locally-defined variables
+        for k, v in globals().items():
+            if not k.startswith('_') or k.startswith('__'):
+                vars(self)[k] = v
+
+    @property
+    def verbose_output(self):
+        return vars(self)['verbose_output']
+
+    @verbose_output.setter
+    def verbose_output(self, val):
+        # do not override command line warnings options
+        if not sys.warnoptions:
+            if val:
+                # do not override filterwarnings('always')
+                if not (self.debug_log or 'deprecation' in self.log):
+                    filterwarnings('module')
+            else:
+                # deactivate filterwarnings('module')
+                for i, (action, msg_regex, category, module_regex, lineno) in \
+                        enumerate(_warn_filters):
+                    if (
+                        action == 'module'
+                        and category == Warning
+                        and lineno == 0
+                        and msg_regex.pattern == ''
+                        and module_regex.pattern == ''
+                    ):
+                        _warn_filters.pop(i)
+        vars(self)['verbose_output'] = val
 
 
 # IMPORTANT:
@@ -1154,6 +1193,8 @@ if (not ignore_file_security_warnings and
           " permission or set 'ignore_file_security_warnings' to true.")
     sys.exit(1)
 
+sys.modules[__name__] = _Config2()
+
 #
 # When called as main program, list all configuration variables
 #
@@ -1183,10 +1224,3 @@ if __name__ == "__main__":
                     else:
                         _value = repr(_value)
                     output('{0}={1}'.format(_name, _value))
-
-# cleanup all locally-defined variables
-for __var in list(globals().keys()):
-    if __var.startswith("_") and not __var.startswith("__"):
-        del sys.modules[__name__].__dict__[__var]
-
-del __var
