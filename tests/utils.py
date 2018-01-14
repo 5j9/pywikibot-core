@@ -462,10 +462,8 @@ class DrySite(pywikibot.site.APISite):
         return self._userinfo
 
     def version(self):
-        """Dummy version, with warning to show the callers context."""
-        warn('%r returning version 1.24; override if unsuitable.'
-             % self, DrySiteNote, stacklevel=2)
-        return '1.24'
+        """Dummy version. Return '999.999'."""
+        return '999.999'
 
     def image_repository(self):
         """Return Site object for image repository e.g. commons."""
