@@ -24,6 +24,10 @@ codecov
 coverage
 mock ; python_version < '3'
 
+# T185000: vcrpy requires yarl on py 3.4, yarl 1.0.0 requires multidict 4.0.0,
+# multidict 4.0.0 does not support py 3.4.0
+yarl<1.0.0 ; python_version == "3.4" and python_full_version < "3.4.1"
+multidict<4.0.0,>=2.0 ; python_version == "3.4" and python_full_version < "3.4.1"
 vcrpy-unittest
 
 # pywin32 & pywinauto>=0.4.0 are Win32 UI test dependencies that have been
