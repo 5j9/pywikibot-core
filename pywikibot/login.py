@@ -273,10 +273,12 @@ usernames['%(fam_name)s']['%(wiki_code)s'] = 'myUsername'"""
                     code == self.site.code):
                 if isinstance(password, basestring):
                     self.password = password
+                    self._is_bot_pswd = False
                     break
                 elif isinstance(password, BotPassword):
                     self.password = password.password
                     self.login_name = password.login_name(self.username)
+                    self._is_bot_pswd = True
                     break
                 else:
                     warn('Invalid password format', _PasswordFileWarning)

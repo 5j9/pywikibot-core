@@ -30,6 +30,10 @@ import pywikibot
 
 from pywikibot import config, login
 
+from pywikibot.bot import (
+    input, input_choice, input_list_choice, input_yn, output,
+    QuitKeyboardInterrupt
+)
 from pywikibot.comms import http
 from pywikibot.exceptions import (
     Server504Error, Server414Error, FatalServerError, NoUsername,
@@ -3062,7 +3066,13 @@ class LoginManager(login.LoginManager):
                 pywikibot.warning(u"Too many tries, waiting %s seconds before retrying."
                                   % diff.seconds)
                 time.sleep(diff.seconds)
+        if self._is_bot_pswd or MediaWikiVersion(self.site.version()) < '1.27':
+            self._login()
+        else:
+            self._client_login()
 
+    def _login(self):
+        """Login using action=login."""
         # base login request
         login_request = self.site._request(
             use_get=False,
@@ -3100,6 +3110,38 @@ class LoginManager(login.LoginManager):
         info = login_result['login'].get('reason', '')
         raise APIError(code=login_result['login']['result'], info=info)
 
+    def _client_login(self):
+        """Login using action=clientlogin."""
+        auth_requests = self.site._request(parameters={
+            'action': 'query',
+            'meta': 'authmanagerinfo',
+            'amirequestsfor': 'login',
+        }).submit()['query']['authmanagerinfo']['requests']
+        params = self._get_auth_params(auth_requests)
+        params['action'] = 'clientlogin'
+        params['logintoken'] = self.get_login_token()
+        # loginreturnurl is required. Use an arbitrary url from self.site.
+        params['loginreturnurl'] = self.site.siteinfo['server']
+        result = self.site._request(
+            use_get=False, parameters=params
+        ).submit()['clientlogin']
+        status = result['status']
+        if status == 'PASS':
+            return
+        if status == 'UI':
+            # Todo: present the new fields to the user and obtain their submission
+            params['logincontinue'] = True
+        if status == 'REDIRECT':
+            output(
+                'Please navigate to {0} and provide the '
+                'requested data.'.format(result['redirecttarget'])
+            )
+            # TOdo
+            params.update(self._get_auth_params(result['requests']))
+            params['logincontinue'] = True
+        if status in ('FAIL', 'RESTART'):
+            raise RuntimeError('Login failed.')
+
     def storecookiedata(self, data):
         """Ignore data; cookies are set by threadedhttp module."""
         http.cookie_jar.save()
@@ -3121,6 +3163,88 @@ class LoginManager(login.LoginManager):
         )
         login_token_result = login_token_request.submit()
         return login_token_result['query']['tokens'].get('logintoken')
+
+    def _get_auth_params(self, auth_requests):
+        """Return client-login params according to auth_requests."""
+        primary_requests = [
+            auth_request for auth_request in auth_requests
+            if auth_request['required'] == 'primary-required'
+        ]
+        if len(primary_requests) > 1:
+            chosen_id = primary_requests[input_choice(
+                question='Which authentication provider do you prefer?',
+                answers=[
+                    (str(index), request['provider'])
+                    for index, request in enumerate(primary_requests, 1)
+                ],
+                default='1',
+                return_shortcut=False,
+                automatic_quit=False,
+            )]['id']
+            auth_requests = [
+                r for r in auth_requests
+                if r['required'] != 'primary-required' or r['id'] == chosen_id
+            ]
+        params = {
+            'username': self.login_name,
+            'password': self.password,
+            'rememberMe': True,
+        }
+        for auth_request in auth_requests:
+            _handle_auth_request(auth_request, params)
+        return params
+
+
+def _handle_auth_request(auth_request, params):
+    """Handle auth_request by updating params.
+
+    See https://www.mediawiki.org/wiki/API:Authmanagerinfo for more details.
+    """
+    for field, field_values in auth_request['fields'].items():
+        if field in ('username', 'password', 'rememberMe'):
+            continue
+        field_type = field['type']
+        question = '{0}[label] ({0[help]})'.format(field_values)
+        if field_type == 'string':
+            params[field] = input(question)
+            continue
+        if field_type == 'password':
+            params[field] = input(question, password=True)
+            continue
+        if field_type == 'checkbox':
+            params[field] = input_yn(question, automatic_quit=False)
+            continue
+        if field_type in ('select', 'multiselect'):
+            answers = [
+                (str(i), '{0} ({1})'.format(opt, opt_help))
+                for i, (opt, opt_help) in enumerate(
+                    field_values['options'].items(), 1
+                )
+            ]
+            if field_type == 'select':
+                params[field] = input_list_choice(
+                    question, field_values['options'])
+                continue
+            # field_type == 'multiselect'
+            options = []
+            while True:
+                try:
+                    choice = input_choice(
+                        question, answers,
+                        return_shortcut=False,
+                        automatic_quit=True,
+                    )
+                except QuitKeyboardInterrupt:
+                    params[field] = options
+                    break
+                else:
+                    options.append(choice)
+            continue
+        if field_type == 'hidden':
+            # not intended to be displayed to the user.
+            # send value back to the server unchanged.
+            params[field] = field_values['value']
+        # ignore `button` and `null` field types
 
 
 def encode_url(query):
