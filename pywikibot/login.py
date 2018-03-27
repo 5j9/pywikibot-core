@@ -125,38 +125,6 @@ usernames['%(fam_name)s']['%(wiki_code)s'] = 'myUsername'"""
         if getattr(config, 'password_file', ''):
             self.readPassword()
 
-    def check_user_exists(self):
-        """
-        Check that the username exists on the site.
-
-        @raises NoUsername: Username doesnt exist in user list.
-        """
-        # convert any Special:BotPassword usernames to main account equivalent
-        main_username = self.username
-        if '@' in self.username:
-            warn(
-                'When using BotPasswords it is recommended that you store your '
-                'login credentials in a password_file instead. '
-                'See https://www.mediawiki.org/wiki/Manual:Pywikibot/BotPasswords '
-                'for instructions and more information.')
-            main_username = self.username.partition('@')[0]
-
-        try:
-            data = self.site.allusers(start=main_username, total=1)
-            user = next(iter(data))
-        except pywikibot.data.api.APIError as e:
-            if e.code == 'readapidenied':
-                pywikibot.warning('Could not check user %s exists on %s'
-                                  % (main_username, self.site))
-                return
-            else:
-                raise
-
-        if user['name'] != main_username:
-            # Report the same error as server error code NotExists
-            raise NoUsername('Username \'%s\' does not exist on %s'
-                             % (main_username, self.site))
-
     def botAllowed(self):
         """
         Check whether the bot is listed on a specific page.
@@ -281,25 +249,17 @@ usernames['%(fam_name)s']['%(wiki_code)s'] = 'myUsername'"""
                 else:
                     warn('Invalid password format', _PasswordFileWarning)
 
-    def login(self, retry=False, autocreate=False):
+    @deprecated_args(autocreate=None)
+    def login(self, retry=False):
         """
         Attempt to log into the server.
 
         @param retry: infinitely retry if the API returns an unknown error
         @type retry: bool
 
-        @param autocreate: if true, allow auto-creation of the account
-                           using unified login
-        @type autocreate: bool
-
         @raises NoUsername: Username is not recognised by the site.
         """
         if not self.password:
-            # First check that the username exists,
-            # to avoid asking for a password that will not work.
-            if not autocreate:
-                self.check_user_exists()
-
             # As we don't want the password to appear on the screen, we set
             # password = True
             self.password = pywikibot.input(

@@ -40,9 +40,6 @@ Parameters:
                 manually. -logout, -pass, -force, -pass:XXXX and -sysop are not
                 compatible with -oauth.
 
-   -autocreate  Auto-create an account using unified login when necessary.
-                Note: the global account must exist already before using this.
-
 If not given as parameter, the script will ask for your username and
 password (password entry will be hidden), log in to your home wiki using
 this combination, and store the resulting cookies (containing your password
@@ -123,7 +120,6 @@ def main(*args):
     logall = False
     logout = False
     oauth = False
-    autocreate = False
     unknown_args = []
     for arg in pywikibot.handle_args(args):
         if arg.startswith("-pass"):
@@ -146,7 +142,8 @@ def main(*args):
         elif arg == '-oauth':
             oauth = True
         elif arg == '-autocreate':
-            autocreate = True
+            pywikibot.tools.issue_deprecation_warning(
+                'The -autocreate argument is deprecated.', '', 1)
         else:
             unknown_args += [arg]
 
@@ -176,7 +173,7 @@ def main(*args):
                 if logout:
                     site.logout()
                 else:
-                    site.login(sysop, autocreate=autocreate)
+                    site.login(sysop)
                 user = site.user()
                 if user:
                     pywikibot.output(
