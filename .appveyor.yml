@@ -18,7 +18,19 @@ environment:
     # Test the lowest supported release of each major Python version.
 
     - PYTHON: "C:\\Python272"
-      PYTHON_VERSION: "2.7.2"
+      PYTHON_VERSION: "2.7.4"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python272"
+      PYTHON_VERSION: "2.7.5"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python272"
+      PYTHON_VERSION: "2.7.6"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python272"
+      PYTHON_VERSION: "2.7.7"
       PYTHON_ARCH: "32"
 
     - PYTHON: "C:\\Python340"
