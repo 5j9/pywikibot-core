@@ -18,55 +18,55 @@ environment:
 
     # Test the lowest supported release of each major Python version.
 
-#    - PYTHON: "C:\\Python272"
-#      PYTHON_VERSION: "2.7.2"
-#      PYTHON_ARCH: "32"
-#
+    - PYTHON: "C:\\Python272"
+      PYTHON_VERSION: "2.7.2"
+      PYTHON_ARCH: "32"
+
     - PYTHON: "C:\\Python340"
       PYTHON_VERSION: "3.4.0"
       PYTHON_ARCH: "32"
-#
-#    - PYTHON: "C:\\Python272-x64"
-#      PYTHON_VERSION: "2.7.2"
-#      PYTHON_ARCH: "64"
-#
+
+    - PYTHON: "C:\\Python272-x64"
+      PYTHON_VERSION: "2.7.2"
+      PYTHON_ARCH: "64"
+
     - PYTHON: "C:\\Python340-x64"
       PYTHON_VERSION: "3.4.0"
       PYTHON_ARCH: "64"
-#
-#    # Appveyor pre-installs these versions onto build machines
-#
-#    - PYTHON: "C:\\Python27"
-#      PYTHON_VERSION: "2.7.x"
-#      PYTHON_ARCH: "32"
-#
-#    - PYTHON: "C:\\Python34"
-#      PYTHON_VERSION: "3.4.x"
-#      PYTHON_ARCH: "32"
-#
-#    - PYTHON: "C:\\Python35"
-#      PYTHON_VERSION: "3.5.x"
-#      PYTHON_ARCH: "32"
-#
-#    - PYTHON: "C:\\Python36"
-#      PYTHON_VERSION: "3.6.x"
-#      PYTHON_ARCH: "32"
-#
-#    - PYTHON: "C:\\Python27-x64"
-#      PYTHON_VERSION: "2.7.x"
-#      PYTHON_ARCH: "64"
-#
-#    - PYTHON: "C:\\Python34-x64"
-#      PYTHON_VERSION: "3.4.x"
-#      PYTHON_ARCH: "64"
-#
-#    - PYTHON: "C:\\Python35-x64"
-#      PYTHON_VERSION: "3.5.x"
-#      PYTHON_ARCH: "64"
-#
-#    - PYTHON: "C:\\Python36-x64"
-#      PYTHON_VERSION: "3.6.x"
-#      PYTHON_ARCH: "64"
+
+    # Appveyor pre-installs these versions onto build machines
+
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.4.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python27-x64"
+      PYTHON_VERSION: "2.7.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python34-x64"
+      PYTHON_VERSION: "3.4.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6.x"
+      PYTHON_ARCH: "64"
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
@@ -84,22 +84,24 @@ install:
   - pip install virtualenv
   - virtualenv env
   - env\Scripts\activate.bat
+  - pip install requests
+  - python -c "import requests; print(requests.get('https://www.howsmyssl.com/a/check', verify=False).json()['tls_version'])"
   - if "%PYTHON_VERSION%" equ "3.4.0" %PYTHON%\python -m pip install --upgrade setuptools pip
   - pip install -r dev-requirements.txt
   - pip install -r requests-requirements.txt
 
 build: off
 
-test_script:
-  - chcp 65001
-  - set PYTHONIOENCODING=utf8
-
-  - "mkdir %PYWIKIBOT2_DIR%"
-  - "python -Werror::UserWarning -m generate_user_files -dir:%PYWIKIBOT2_DIR% -family:wikipedia -lang:en -v -debug"
-  - ps: "[IO.File]::AppendAllText($env:PYWIKIBOT2_USER_CONFIG, 'max_retries = 2; maximum_GET_length = 5000; transliteration_target = None;')"
-
-  - set PYSETUP_TEST_NO_UI=1
-  - "%CMD_IN_ENV% coverage run setup.py test"
+#test_script:
+#  - chcp 65001
+#  - set PYTHONIOENCODING=utf8
+#
+#  - "mkdir %PYWIKIBOT2_DIR%"
+#  - "python -Werror::UserWarning -m generate_user_files -dir:%PYWIKIBOT2_DIR% -family:wikipedia -lang:en -v -debug"
+#  - ps: "[IO.File]::AppendAllText($env:PYWIKIBOT2_USER_CONFIG, 'max_retries = 2; maximum_GET_length = 5000; transliteration_target = None;')"
+#
+#  - set PYSETUP_TEST_NO_UI=1
+#  - "%CMD_IN_ENV% coverage run setup.py test"
 
 on_failure:
   - codecov
