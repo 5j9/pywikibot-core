@@ -2,12 +2,12 @@ clone_depth: 50
 environment:
 
   global:
-    APPVEYOR_PYTHON_URL: "https://raw.githubusercontent.com/ogrisel/python-appveyor-demo/master/appveyor/"
+    APPVEYOR_PYTHON_URL: "https://raw.githubusercontent.com/ionelmc/python-lazy-object-proxy/master/ci/"
 
     # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
     # /E:ON and /V:ON options are not enabled in the batch script intepreter
     # See: http://stackoverflow.com/a/13751649/163740
-    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
+    WITH_COMPILER: 'cmd /E:ON /V:ON /C appveyor-with-compiler.cmd'
 
     PYWIKIBOT2_DIR: "%appdata%\\Pywikibot"
     PYWIKIBOT2_USER_CONFIG: "%appdata%\\Pywikibot\\user-config.py"
@@ -18,55 +18,55 @@ environment:
 
     # Test the lowest supported release of each major Python version.
 
-    - PYTHON: "C:\\Python272"
-      PYTHON_VERSION: "2.7.2"
-      PYTHON_ARCH: "32"
+#    - PYTHON_HOME: "C:\\Python272"
+#      PYTHON_VERSION: "2.7.2"
+#      PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python340"
+    - PYTHON_HOME: "C:\\Python340"
       PYTHON_VERSION: "3.4.0"
       PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python272-x64"
-      PYTHON_VERSION: "2.7.2"
-      PYTHON_ARCH: "64"
+#    - PYTHON_HOME: "C:\\Python272-x64"
+#      PYTHON_VERSION: "2.7.2"
+#      PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python340-x64"
+    - PYTHON_HOME: "C:\\Python340-x64"
       PYTHON_VERSION: "3.4.0"
       PYTHON_ARCH: "64"
 
     # Appveyor pre-installs these versions onto build machines
 
-    - PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7.x"
-      PYTHON_ARCH: "32"
-
-    - PYTHON: "C:\\Python34"
-      PYTHON_VERSION: "3.4.x"
-      PYTHON_ARCH: "32"
-
-    - PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5.x"
-      PYTHON_ARCH: "32"
-
-    - PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6.x"
-      PYTHON_ARCH: "32"
-
-    - PYTHON: "C:\\Python27-x64"
-      PYTHON_VERSION: "2.7.x"
-      PYTHON_ARCH: "64"
-
-    - PYTHON: "C:\\Python34-x64"
-      PYTHON_VERSION: "3.4.x"
-      PYTHON_ARCH: "64"
-
-    - PYTHON: "C:\\Python35-x64"
-      PYTHON_VERSION: "3.5.x"
-      PYTHON_ARCH: "64"
-
-    - PYTHON: "C:\\Python36-x64"
-      PYTHON_VERSION: "3.6.x"
-      PYTHON_ARCH: "64"
+#    - PYTHON_HOME: "C:\\Python27"
+#      PYTHON_VERSION: "2.7.x"
+#      PYTHON_ARCH: "32"
+#
+#    - PYTHON_HOME: "C:\\Python34"
+#      PYTHON_VERSION: "3.4.x"
+#      PYTHON_ARCH: "32"
+#
+#    - PYTHON_HOME: "C:\\Python35"
+#      PYTHON_VERSION: "3.5.x"
+#      PYTHON_ARCH: "32"
+#
+#    - PYTHON_HOME: "C:\\Python36"
+#      PYTHON_VERSION: "3.6.x"
+#      PYTHON_ARCH: "32"
+#
+#    - PYTHON_HOME: "C:\\Python27-x64"
+#      PYTHON_VERSION: "2.7.x"
+#      PYTHON_ARCH: "64"
+#
+#    - PYTHON_HOME: "C:\\Python34-x64"
+#      PYTHON_VERSION: "3.4.x"
+#      PYTHON_ARCH: "64"
+#
+#    - PYTHON_HOME: "C:\\Python35-x64"
+#      PYTHON_VERSION: "3.5.x"
+#      PYTHON_ARCH: "64"
+#
+#    - PYTHON_HOME: "C:\\Python36-x64"
+#      PYTHON_VERSION: "3.6.x"
+#      PYTHON_ARCH: "64"
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
@@ -76,11 +76,12 @@ install:
   # Download the Appveyor Python build accessories into subdirectory .\appveyor
   - mkdir appveyor
   - ps: $wc = new-object net.webclient
-  - ps: $run = $wc.DownloadString($env:APPVEYOR_PYTHON_URL + 'run_with_env.cmd')
-  - ps: $run | Out-File -Encoding ascii -FilePath appveyor\run_with_env.cmd
+  - ps: $run = $wc.DownloadString($env:APPVEYOR_PYTHON_URL + 'appveyor-with-compiler.cmd')
+  - ps: $run | Out-File -Encoding ascii -FilePath appveyor-with-compiler.cmd
+  - ps: $run = $wc.DownloadString($env:APPVEYOR_PYTHON_URL + 'appveyor-bootstrap.py')
+  - ps: $run | Out-File -Encoding ascii -FilePath appveyor-bootstrap.py
+  - python -u appveyor-bootstrap.py
 
-  # This is needed for Python versions not installed on Appveyor build machines
-  - ps: if (-not(Test-Path($env:PYTHON))) { iex $wc.DownloadString($env:APPVEYOR_PYTHON_URL + 'install.ps1') }
   - pip install virtualenv
   - virtualenv env
   - env\Scripts\activate.bat
@@ -96,9 +97,8 @@ test_script:
   - "mkdir %PYWIKIBOT2_DIR%"
   - "python -Werror::UserWarning -m generate_user_files -dir:%PYWIKIBOT2_DIR% -family:wikipedia -lang:en -v -debug"
   - ps: "[IO.File]::AppendAllText($env:PYWIKIBOT2_USER_CONFIG, 'max_retries = 2; maximum_GET_length = 5000; transliteration_target = None;')"
-
   - set PYSETUP_TEST_NO_UI=1
-  - "%CMD_IN_ENV% coverage run setup.py test"
+  - "%WITH_COMPILER% coverage run setup.py test"
 
 on_failure:
   - codecov

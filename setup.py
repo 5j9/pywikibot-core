@@ -163,6 +163,7 @@ if PY2:
     test_deps += extra_deps['csv'] + ['mock']
 else:
     test_deps += ['six']
+extra_deps['test'] = test_deps
 
 from setuptools import setup, find_packages
 
