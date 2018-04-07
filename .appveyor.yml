@@ -67,7 +67,7 @@ init:
 install:
   - git submodule update --init
   - python scripts\maintenance\appveyor_python_setup.py
-  - where python pip
+  - if exist env env/Scripts/activate.bat
   - pip install -r dev-requirements.txt -r requests-requirements.txt
 
 build: off

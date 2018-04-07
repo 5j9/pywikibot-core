@@ -7,6 +7,7 @@ from __future__ import (
 from io import open
 from os import getenv, listdir, remove
 from os.path import exists
+from shutil import copyfile
 from subprocess import CalledProcessError, check_output
 try:
     from urllib.request import urlretrieve
@@ -67,33 +68,13 @@ def install_python(installer, python_dir, python_ver):
         raise SystemExit('install_python failed')
 
 
-def download_packages(packages, python_dir):
-    """Download packages and return their paths."""
-    preinstalled_py_dir = python_dir[:11] + python_dir[12:] \
-        if len(python_dir) in (16, 12) else python_dir
-    preinstalled_pip = preinstalled_py_dir + '/scripts/pip.exe'
-    # It is not possible to use --python-version due to cryptography
-    # requirements on py2.7 which leads to
-    # https://stackoverflow.com/questions/46287077/
-    check_output([
-        preinstalled_pip, 'download', '--dest', '.pip_downloads',
-        '--disable-pip-version-check'] + packages)
-    downloads = listdir('.pip_downloads')
-    assert downloads, 'pip did not download anything'
-    return ['.pip_downloads/' + fn for fn in downloads]
-
-
-def install_packages(python_dir, python_ver):
-    """Install/upgrade pip, setuptools, and other packages if required."""
-    python = python_dir + '/python.exe'
-    # packages = ['setuptools']
-    # pip_installer = [python, '-m', 'pip', 'install', '-U']
+def prepare_pip(python_ver):
+    """Prepare pip for older versions of python."""
     if python_ver < '2.7.9' or python_ver == '3.4.0':
-        # Due to ssl errors (TXX) older versions of pip are not able to
-        # communicate with pypi. Delete pip.exe to fallback on the pip
-        # of appveyor's pre-installed python.
-        remove(python_dir + '/Scripts/pip.exe')
-    # check_output(pip_installer + download_packages(packages, python_dir))
+        # virtualenv binds the pip of pre-installed python to current python
+        # installation.
+        check_output('pip install virtualenv', shell=True)
+        check_output('virtualenv env', shell=True)
 
 
 def main():
@@ -106,7 +87,7 @@ def main():
     if not exists(python_dir + r'\python.exe'):
         print_python_install_log(python_ver)
         raise SystemExit(python_dir + r'\python.exe not found')
-    install_packages(python_dir, python_ver)
+    prepare_pip(python_dir)
 
 
 if __name__ == '__main__':
