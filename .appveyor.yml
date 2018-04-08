@@ -72,6 +72,7 @@ install:
   - env\Scripts\activate.bat
   - pip install -r dev-requirements.txt
   - pip install -r requests-requirements.txt
+  - python --version
 
 build: off
 
