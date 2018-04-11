@@ -83,6 +83,15 @@ def download_packages(packages, python_dir):
     return ['.pip_downloads/' + fn for fn in downloads]
 
 
+def install_pyopenssl(python_dir):
+    """Install pyopenssl and add the related instructions to site.py."""
+    # T191188; https://urllib3.readthedocs.io/en/latest/user-guide.html#ssl-py2
+    with open(python_dir + '/sitecustomize.py', 'w') as sitecustomize:
+        sitecustomize.write(
+            'import urllib3.contrib.pyopenssl\n'
+            'urllib3.contrib.pyopenssl.inject_into_urllib3()\n')
+
+
 def install_packages(python_dir, python_ver):
     """Install/upgrade pip, setuptools, and other packages if required."""
     python = python_dir + '/python.exe'
@@ -93,8 +102,13 @@ def install_packages(python_dir, python_ver):
         urlretrieve('https://bootstrap.pypa.io/get-pip.py', 'get-pip.py')
         pip_installer = [python, '-m', 'get-pip', '-U']
         packages.remove('setuptools')  # can't upgrade bootstrapped setuptools
-        packages.extend(('wheel', 'pip'))
+        packages.extend(('wheel', 'pip', 'urllib3[secure]'))
         packages = download_packages(packages, python_dir)
+        install_pyopenssl(python_dir)
+    elif python_ver == '3.4.0':
+        packages.append('urllib3[secure]')
+        packages = download_packages(packages, python_dir)
+        install_pyopenssl(python_dir)
     check_call(pip_installer + packages)
 
 
