@@ -21,9 +21,8 @@ from warnings import warn
 _orig_no_user_config = os.environ.get('PYWIKIBOT2_NO_USER_CONFIG')
 os.environ['PYWIKIBOT2_NO_USER_CONFIG'] = '2'
 
-import pywikibot
-
-from pywikibot import config
+import pywikibot  # noqa: E402
+from pywikibot import config  # noqa: E402
 
 # Reset this flag in case another script is run by pwb after this script
 if not _orig_no_user_config:
