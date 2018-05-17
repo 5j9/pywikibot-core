@@ -128,6 +128,7 @@ env:
     - LANGUAGE=zh FAMILY=wikisource PYSETUP_TEST_EXTRAS=1 PYWIKIBOT_TEST_PROD_ONLY=1 PYWIKIBOT_TEST_NO_RC=1
 
 matrix:
+  fast_finish: true
   include:
     - python: '2.7_with_system_site_packages'
       env: LANGUAGE=nb FAMILY=wikipedia DIST=trusty PYSETUP_TEST_EXTRAS=1 PYWIKIBOT_TEST_NO_RC=1
@@ -158,6 +159,15 @@ matrix:
       env: LANGUAGE=ar FAMILY=wiktionary PYWIKIBOT_TEST_NO_RC=1
     - python: '3.6'
       env: LANGUAGE=wikidata FAMILY=wikidata SITE_ONLY=1
+    - python: '3.7'
+      env: LANGUAGE=de FAMILY=wikipedia SITE_ONLY=1
+      dist: xenial
+      sudo: required
+  allow_failures:
+    - python: '3.7'
+      env: LANGUAGE=de FAMILY=wikipedia SITE_ONLY=1
+      dist: xenial
+      sudo: required
 
 notifications:
   email:
