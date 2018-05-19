@@ -168,11 +168,11 @@ class ImageTransferBot(object):
             pywikibot.output('Image description page is redirect.')
         else:
             bot = UploadRobot(url=url, description=description,
-                              targetSite=self.targetSite,
-                              urlEncoding=sourceSite.encoding(),
-                              keepFilename=self.keep_name,
-                              verifyDescription=not self.keep_name,
-                              ignoreWarning=self.ignore_warning)
+                              target_site=self.targetSite,
+                              url_encoding=sourceSite.encoding(),
+                              keep_filename=self.keep_name,
+                              verify_description=not self.keep_name,
+                              ignore_warning=self.ignore_warning)
             # try to upload
             targetFilename = bot.run()
             if targetFilename and self.targetSite.family.name == 'commons' and \
@@ -202,7 +202,7 @@ class ImageTransferBot(object):
             image = imagelist[i]
             pywikibot.output('-' * 60)
             pywikibot.output(u"%s. Found image: %s"
-                             % (i, image.title(asLink=True)))
+                             % (i, image.title(as_link=True)))
             try:
                 # Show the image description page's contents
                 pywikibot.output(image.get())

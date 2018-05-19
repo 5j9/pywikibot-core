@@ -328,9 +328,9 @@ def processPhoto(flickr, photo_id=u'', flickrreview=False, reviewer=u'',
             if not skip:
                 bot = UploadRobot(photoUrl,
                                   description=newPhotoDescription,
-                                  useFilename=newFilename,
-                                  keepFilename=True,
-                                  verifyDescription=False)
+                                  use_filename=newFilename,
+                                  keep_filename=True,
+                                  verify_description=False)
                 bot.upload_image(debug=False)
                 return 1
     else:

@@ -24,6 +24,7 @@ from pywikibot.exceptions import InvalidTitle
 from pywikibot.family import Family
 from pywikibot.tools import (
     deprecate_arg,
+    deprecated_args,
     deprecated,
     DeprecatedRegex,
     StringTypes,
@@ -208,7 +209,7 @@ class _MultiTemplateMatchBuilder(object):
         namespace = self.site.namespaces[10]
         if isinstance(template, pywikibot.Page):
             if template.namespace() == 10:
-                old = template.title(withNamespace=False)
+                old = template.title(with_namespace=False)
             else:
                 raise ValueError(
                     '{0} is not a template Page object'.format(template))
@@ -335,7 +336,8 @@ def _get_regexes(keys, site):
     return result
 
 
-def replaceExcept(text, old, new, exceptions, caseInsensitive=False,
+@deprecated_args(caseInsensitive='case_insensitive')
+def replaceExcept(text, old, new, exceptions, case_insensitive=False,
                   allowoverlap=False, marker='', site=None, count=0):
     """
     Return text with 'old' replaced by 'new', ignoring specified types of text.
@@ -353,7 +355,7 @@ def replaceExcept(text, old, new, exceptions, caseInsensitive=False,
         re.sub().
     @param exceptions: a list of strings which signal what to leave out,
         e.g. ['math', 'table', 'template']
-    @type caseInsensitive: bool
+    @type case_insensitive: bool
     @param marker: a string that will be added to the last replacement;
         if nothing is changed, it is added at the end
     @param count: how many replacements to do at most. See parameter
@@ -362,7 +364,7 @@ def replaceExcept(text, old, new, exceptions, caseInsensitive=False,
     """
     # if we got a string, compile it as a regular expression
     if isinstance(old, basestring):
-        if caseInsensitive:
+        if case_insensitive:
             old = re.compile(old, re.IGNORECASE | re.UNICODE)
         else:
             old = re.compile(old)
@@ -965,7 +967,8 @@ def removeLanguageLinksAndSeparator(text, site=None, marker='', separator=''):
         return removeLanguageLinks(text, site, marker)
 
 
-def replaceLanguageLinks(oldtext, new, site=None, addOnly=False,
+@deprecated_args(addOnly='add_only')
+def replaceLanguageLinks(oldtext, new, site=None, add_only=False,
                          template=False, template_subpage=False):
     """Replace inter-language links in the text with a new set of links.
 
@@ -977,9 +980,9 @@ def replaceLanguageLinks(oldtext, new, site=None, addOnly=False,
     @type new: dict
     @param site: The site that the text is from.
     @type site: pywikibot.Site
-    @param addOnly: If True, do not remove old language links, only add new
+    @param add_only: If True, do not remove old language links, only add new
         ones.
-    @type addOnly: bool
+    @type add_only: bool
     @param template: Indicates if text belongs to a template page or not.
     @type template: bool
     @param template_subpage: Indicates if text belongs to a template sub-page
@@ -996,7 +999,7 @@ def replaceLanguageLinks(oldtext, new, site=None, addOnly=False,
     cseparator = site.family.category_text_separator
     separatorstripped = separator.strip()
     cseparatorstripped = cseparator.strip()
-    if addOnly:
+    if add_only:
         s2 = oldtext
     else:
         s2 = removeLanguageLinksAndSeparator(oldtext, site=site, marker=marker,
@@ -1029,7 +1032,7 @@ def replaceLanguageLinks(oldtext, new, site=None, addOnly=False,
                     s2.replace(marker, cseparatorstripped).strip(), site) + \
                     separator + s
                 newtext = replaceCategoryLinks(s2, cats, site=site,
-                                               addOnly=True)
+                                               add_only=True)
             # for Wikitravel's language links position.
             # (not supported by rewrite - no API)
             elif site.family.name == 'wikitravel':
@@ -1090,7 +1093,7 @@ def interwikiFormat(links, insite=None):
         if isinstance(links[site], pywikibot.Link):
             links[site] = pywikibot.Page(links[site])
         if isinstance(links[site], pywikibot.Page):
-            title = links[site].title(asLink=True, forceInterwiki=True,
+            title = links[site].title(as_link=True, force_interwiki=True,
                                       insite=insite)
             link = title.replace('[[:', '[[')
             s.append(link)
@@ -1163,7 +1166,7 @@ def getCategoryLinks(text, site=None, include=[], expand_text=False):
             cat = pywikibot.Category(pywikibot.Link(
                                      '%s:%s' % (match.group('namespace'), title),
                                      site),
-                                     sortKey=sortKey)
+                                     sort_key=sortKey)
         except InvalidTitle:
             # Category title extracted contains invalid characters
             # Likely due to on-the-fly category name creation, see T154309
@@ -1236,7 +1239,7 @@ def replaceCategoryInPlace(oldtext, oldcat, newcat, site=None,
         site = pywikibot.Site()
 
     catNamespace = '|'.join(site.namespaces.CATEGORY)
-    title = oldcat.title(withNamespace=False)
+    title = oldcat.title(with_namespace=False)
     if not title:
         return
     # title might contain regex special characters
@@ -1263,19 +1266,20 @@ def replaceCategoryInPlace(oldtext, oldcat, newcat, site=None,
     elif add_only:
         text = replaceExcept(
             oldtext, categoryR,
-            '{0}\n{1}'.format(oldcat.title(asLink=True, allowInterwiki=False),
-                              newcat.title(asLink=True, allowInterwiki=False)),
+            '{0}\n{1}'.format(oldcat.title(as_link=True, allow_interwiki=False),
+                              newcat.title(as_link=True, allow_interwiki=False)),
             exceptions, site=site)
     else:
         text = replaceExcept(oldtext, categoryR,
                              '[[{0}:{1}\\2'
                              .format(site.namespace(14),
-                                     newcat.title(withNamespace=False)),
+                                     newcat.title(with_namespace=False)),
                              exceptions, site=site)
     return text
 
 
-def replaceCategoryLinks(oldtext, new, site=None, addOnly=False):
+@deprecated_args(addOnly='add_only')
+def replaceCategoryLinks(oldtext, new, site=None, add_only=False):
     """
     Replace all existing category links with new category links.
 
@@ -1286,9 +1290,9 @@ def replaceCategoryLinks(oldtext, new, site=None, addOnly=False):
     @type new: iterable
     @param site: The site that the text is from.
     @type site: pywikibot.Site
-    @param addOnly: If addOnly is True, the old category won't be deleted and
+    @param add_only: If addOnly is True, the old category won't be deleted and
         the category(s) given will be added (and they won't replace anything).
-    @type addOnly: bool
+    @type add_only: bool
     @return: The modified text.
     @rtype: str
     """
@@ -1312,7 +1316,7 @@ def replaceCategoryLinks(oldtext, new, site=None, addOnly=False):
     iseparator = site.family.interwiki_text_separator
     separatorstripped = separator.strip()
     iseparatorstripped = iseparator.strip()
-    if addOnly:
+    if add_only:
         cats_removed_text = oldtext
     else:
         cats_removed_text = removeCategoryLinksAndSeparator(
@@ -1344,7 +1348,7 @@ def replaceCategoryLinks(oldtext, new, site=None, addOnly=False):
                     cats_removed_text.replace(marker, ''), site, '',
                     iseparatorstripped) + separator + new_cats
                 newtext = replaceLanguageLinks(
-                    langs_removed_text, interwiki, site, addOnly=True)
+                    langs_removed_text, interwiki, site, add_only=True)
     else:
         newtext = cats_removed_text.replace(marker, '')
     return newtext.strip()
@@ -1377,8 +1381,8 @@ def categoryFormat(categories, insite=None):
                 category = u'{0}:{1}'.format(insite.namespace(14), category)
             category = pywikibot.Category(pywikibot.Link(category,
                                                          insite,
-                                                         defaultNamespace=14),
-                                          sortKey=sortKey)
+                                                         default_namespace=14),
+                                          sort_key=sortKey)
         # Make sure a category is casted from Page to Category.
         elif not isinstance(category, pywikibot.Category):
             category = pywikibot.Category(category)
@@ -1397,8 +1401,9 @@ def categoryFormat(categories, insite=None):
 # -------------------------------------
 # Functions dealing with external links
 # -------------------------------------
-
-def compileLinkR(withoutBracketed=False, onlyBracketed=False):
+@deprecated_args(
+    withoutBracketed='without_bracketed', onlyBracketed='only_bracketed')
+def compileLinkR(without_bracketed=False, only_bracketed=False):
     """Return a regex that matches external links."""
     # RFC 2396 says that URLs may only contain certain characters.
     # For this regex we also accept non-allowed characters, so that the bot
@@ -1421,9 +1426,9 @@ def compileLinkR(withoutBracketed=False, onlyBracketed=False):
             r'[^%(notAtEnd)s])' % {'notInside': notInside,
                                    'notAtEnd': notAtEnd}
 
-    if withoutBracketed:
+    if without_bracketed:
         regex = r'(?<!\[)' + regex
-    elif onlyBracketed:
+    elif only_bracketed:
         regex = r'\[' + regex
     linkR = re.compile(regex)
     return linkR
@@ -2064,12 +2069,13 @@ class TimeStripper(object):
             return (txt, None)
 
     @staticmethod
-    def _valid_date_dict_positions(dateDict):
+    @deprecate_arg('dateDict', 'date_dict')
+    def _valid_date_dict_positions(date_dict):
         """Check consistency of reasonable positions for groups."""
-        time_pos = dateDict['time']['start']
-        tzinfo_pos = dateDict['tzinfo']['start']
+        time_pos = date_dict['time']['start']
+        tzinfo_pos = date_dict['tzinfo']['start']
         date_pos = sorted(
-            (dateDict['day'], dateDict['month'], dateDict['year']),
+            (date_dict['day'], date_dict['month'], date_dict['year']),
             key=lambda x: x['start'])
         min_pos, max_pos = date_pos[0]['start'], date_pos[-1]['start']
         max_gap = max(x[1]['start'] - x[0]['end']

@@ -305,22 +305,22 @@ class TestTemplatesInCategory(TestCase):
             [pywikibot.page.Category(self.site, 'Foo')])
         self.assertEqual(textlib.getCategoryLinks(
             '[[Category:{{P1|Foo}}|bar]]', self.site, expand_text=True),
-            [pywikibot.page.Category(self.site, 'Foo', sortKey='bar')])
+            [pywikibot.page.Category(self.site, 'Foo', sort_key='bar')])
         self.assertEqual(textlib.getCategoryLinks(
             '[[Category:{{P1|{{P2|L33t|Foo}}}}|bar]]',
             self.site, expand_text=True),
-            [pywikibot.page.Category(self.site, 'Foo', sortKey='bar')])
+            [pywikibot.page.Category(self.site, 'Foo', sort_key='bar')])
         self.assertEqual(textlib.getCategoryLinks(
             '[[Category:Foo{{!}}bar]]', self.site, expand_text=True),
-            [pywikibot.page.Category(self.site, 'Foo', sortKey='bar')])
+            [pywikibot.page.Category(self.site, 'Foo', sort_key='bar')])
         self.assertEqual(textlib.getCategoryLinks(
             '[[Category:Foo{{!}}bar]][[Category:Wiki{{P2||pedia}}]]',
             self.site, expand_text=True),
-            [pywikibot.page.Category(self.site, 'Foo', sortKey='bar'),
+            [pywikibot.page.Category(self.site, 'Foo', sort_key='bar'),
              pywikibot.page.Category(self.site, 'Wikipedia')])
         self.assertEqual(textlib.getCategoryLinks(
             '[[Category:Foo{{!}}and{{!}}bar]]', self.site, expand_text=True),
-            [pywikibot.page.Category(self.site, 'Foo', sortKey='and|bar')])
+            [pywikibot.page.Category(self.site, 'Foo', sort_key='and|bar')])
         with mock.patch.object(pywikibot, 'warning', autospec=True) as warn:
             textlib.getCategoryLinks('[[Category:nasty{{{!}}]]', self.site)
             warn.assert_called_once_with(
@@ -1100,19 +1100,19 @@ class TestReplaceExcept(DefaultDrySiteTestCase):
     def test_case_sensitive(self):
         """Test replacing with different case sensitivity."""
         self.assertEqual(textlib.replaceExcept('AxB', 'x', 'y', [],
-                                               caseInsensitive=False,
+                                               case_insensitive=False,
                                                site=self.site),
                          'AyB')
         self.assertEqual(textlib.replaceExcept('AxB', 'X', 'y', [],
-                                               caseInsensitive=False,
+                                               case_insensitive=False,
                                                site=self.site),
                          'AxB')
         self.assertEqual(textlib.replaceExcept('AxB', 'x', 'y', [],
-                                               caseInsensitive=True,
+                                               case_insensitive=True,
                                                site=self.site),
                          'AyB')
         self.assertEqual(textlib.replaceExcept('AxB', 'X', 'y', [],
-                                               caseInsensitive=True,
+                                               case_insensitive=True,
                                                site=self.site),
                          'AyB')
 

@@ -668,7 +668,7 @@ class TestPropertyGenerator(TestCase):
         """Test PropertyGenerator with prop 'info'."""
         mainpage = self.get_mainpage()
         links = list(self.site.pagelinks(mainpage, total=10))
-        titles = [l.title(withSection=False)
+        titles = [l.title(with_section=False)
                   for l in links]
         gen = api.PropertyGenerator(site=self.site,
                                     prop="info",
@@ -686,7 +686,7 @@ class TestPropertyGenerator(TestCase):
         """Test PropertyGenerator with prop 'revisions'."""
         mainpage = self.get_mainpage()
         links = list(self.site.pagelinks(mainpage, total=10))
-        titles = [l.title(withSection=False)
+        titles = [l.title(with_section=False)
                   for l in links]
         gen = api.PropertyGenerator(site=self.site,
                                     prop="revisions",
@@ -706,7 +706,7 @@ class TestPropertyGenerator(TestCase):
         """Test PropertyGenerator with prop 'revisions' and 'coordinates'."""
         mainpage = self.get_mainpage()
         links = list(self.site.pagelinks(mainpage, total=10))
-        titles = [l.title(withSection=False)
+        titles = [l.title(with_section=False)
                   for l in links]
         gen = api.PropertyGenerator(site=self.site,
                                     prop="revisions|coordinates",
@@ -727,7 +727,7 @@ class TestPropertyGenerator(TestCase):
         """Test PropertyGenerator with many limited props."""
         mainpage = self.get_mainpage()
         links = list(self.site.pagelinks(mainpage, total=30))
-        titles = [l.title(withSection=False)
+        titles = [l.title(with_section=False)
                   for l in links]
         gen = api.PropertyGenerator(
             site=self.site,
@@ -755,7 +755,7 @@ class TestPropertyGenerator(TestCase):
         # FIXME: test fails
         mainpage = self.get_mainpage()
         links = list(self.site.pagelinks(mainpage, total=30))
-        titles = [l.title(withSection=False)
+        titles = [l.title(with_section=False)
                   for l in links]
         gen = api.PropertyGenerator(
             site=self.site, prop='info|categoryinfo|langlinks|templates',
@@ -776,7 +776,7 @@ class TestPropertyGenerator(TestCase):
         """Long duration test, with total & step that are a real scenario."""
         mainpage = self.get_mainpage()
         links = list(mainpage.backlinks(total=300))
-        titles = [l.title(withSection=False)
+        titles = [l.title(with_section=False)
                   for l in links]
         gen = api.PropertyGenerator(
             site=self.site, prop='info|categoryinfo|langlinks|templates',

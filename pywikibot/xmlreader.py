@@ -22,7 +22,7 @@ from xml.etree.cElementTree import iterparse
 
 import xml.sax
 
-from pywikibot.tools import open_archive
+from pywikibot.tools import deprecated_args, open_archive
 
 
 def parseRestrictions(restrictions):
@@ -52,8 +52,10 @@ class XmlEntry(object):
 
     """Represent a page."""
 
+    @deprecated_args(
+        editRestriction='edit_restriction', moveRestriction='move_restriction')
     def __init__(self, title, ns, id, text, username, ipedit, timestamp,
-                 editRestriction, moveRestriction, revisionid, comment,
+                 edit_restriction, move_restriction, revisionid, comment,
                  redirect):
         """Constructor."""
         # TODO: there are more tags we can read.
@@ -64,8 +66,8 @@ class XmlEntry(object):
         self.username = username.strip()
         self.ipedit = ipedit
         self.timestamp = timestamp
-        self.editRestriction = editRestriction
-        self.moveRestriction = moveRestriction
+        self.editRestriction = edit_restriction
+        self.moveRestriction = move_restriction
         self.revisionid = revisionid
         self.comment = comment
         self.isredirect = redirect
@@ -179,8 +181,8 @@ class XmlDump(object):
                         username=username or u'',  # username might be deleted
                         ipedit=bool(ipeditor),
                         timestamp=timestamp,
-                        editRestriction=self.editRestriction,
-                        moveRestriction=self.moveRestriction,
+                        edit_restriction=self.editRestriction,
+                        move_restriction=self.moveRestriction,
                         revisionid=revisionid,
                         comment=comment,
                         redirect=self.isredirect

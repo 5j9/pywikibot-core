@@ -18,7 +18,7 @@ import tempfile
 import pywikibot
 
 from pywikibot import config
-from pywikibot.tools import deprecated
+from pywikibot.tools import deprecated, deprecated_args
 
 try:
     from pywikibot.userinterfaces import gui
@@ -72,11 +72,14 @@ class TextEditor(object):
                         for part in command)
 
     @deprecated('_command (should not be used from the outside)')
-    def command(self, tempFilename, text, jumpIndex=None):
+    @deprecated_args(tempFilename='temp_filename', jumpIndex='jump_index')
+    def command(self, temp_filename, text, jump_index=None):
         """Return editor selected in user-config.py."""
-        return TextEditor._concat(self._command(tempFilename, text, jumpIndex))
+        return TextEditor._concat(
+            self._command(temp_filename, text, jump_index))
 
-    def edit(self, text, jumpIndex=None, highlight=None):
+    @deprecated_args(jumpIndex='jump_index')
+    def edit(self, text, jump_index=None, highlight=None):
         """
         Call the editor and thus allows the user to change the text.
 
@@ -84,8 +87,8 @@ class TextEditor(object):
 
         @param text: the text to be edited
         @type text: unicode
-        @param jumpIndex: position at which to put the caret
-        @type jumpIndex: int
+        @param jump_index: position at which to put the caret
+        @type jump_index: int
         @param highlight: each occurrence of this substring will be highlighted
         @type highlight: unicode
         @return: the modified text, or None if the user didn't save the text
@@ -101,7 +104,7 @@ class TextEditor(object):
                                  encoding=config.editor_encoding) as tempFile:
                     tempFile.write(text)
                 creationDate = os.stat(tempFilename).st_mtime
-                subprocess.call(self._command(tempFilename, text, jumpIndex))
+                subprocess.call(self._command(tempFilename, text, jump_index))
                 lastChangeDate = os.stat(tempFilename).st_mtime
                 if lastChangeDate == creationDate:
                     # Nothing changed
@@ -123,4 +126,5 @@ class TextEditor(object):
                 'are typically part of Python but may be packaged separately '
                 'on your platform.\n' % gui)
 
-        return pywikibot.ui.editText(text, jumpIndex=jumpIndex, highlight=highlight)
+        return pywikibot.ui.editText(
+            text, jump_index=jump_index, highlight=highlight)

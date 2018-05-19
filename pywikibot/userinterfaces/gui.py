@@ -19,7 +19,7 @@ import sys
 
 import pywikibot
 from pywikibot import __url__
-from pywikibot.tools import PY2, UnicodeType
+from pywikibot.tools import deprecated_args, PY2, UnicodeType
 
 if sys.version_info[0] > 2:
     import tkinter as Tkinter
@@ -361,14 +361,15 @@ class EditBoxWindow(Tkinter.Frame):
         self.parent.config(menu=menubar)
         self.pack()
 
-    def edit(self, text, jumpIndex=None, highlight=None):
+    @deprecated_args(jumpIndex='jump_index')
+    def edit(self, text, jump_index=None, highlight=None):
         """
         Provide user with editor to modify text.
 
         @param text: the text to be edited
         @type text: unicode
-        @param jumpIndex: position at which to put the caret
-        @type jumpIndex: int
+        @param jump_index: position at which to put the caret
+        @type jump_index: int
         @param highlight: each occurrence of this substring will be highlighted
         @type highlight: unicode
         @return: the modified text, or None if the user didn't save the text
@@ -385,10 +386,10 @@ class EditBoxWindow(Tkinter.Frame):
         # start search if required
         if highlight:
             self.find_all(highlight)
-        if jumpIndex:
+        if jump_index:
             # lines are indexed starting at 1
-            line = text[:jumpIndex].count('\n') + 1
-            column = jumpIndex - (text[:jumpIndex].rfind('\n') + 1)
+            line = text[:jump_index].count('\n') + 1
+            column = jump_index - (text[:jump_index].rfind('\n') + 1)
             # don't know how to place the caret, but scrolling to the right line
             # should already be helpful.
             self.editbox.see('%d.%d' % (line, column))

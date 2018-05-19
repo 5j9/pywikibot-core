@@ -1062,11 +1062,11 @@ class BaseSite(ComparableMixin):
         """
         self._pagemutex.acquire()
         try:
-            while page.title(withSection=False) in self._locked_pages:
+            while page.title(with_section=False) in self._locked_pages:
                 if not block:
-                    raise PageInUse(page.title(withSection=False))
+                    raise PageInUse(page.title(with_section=False))
                 time.sleep(.25)
-            self._locked_pages.append(page.title(withSection=False))
+            self._locked_pages.append(page.title(with_section=False))
         finally:
             self._pagemutex.release()
 
@@ -1080,7 +1080,7 @@ class BaseSite(ComparableMixin):
         """
         self._pagemutex.acquire()
         try:
-            self._locked_pages.remove(page.title(withSection=False))
+            self._locked_pages.remove(page.title(with_section=False))
         finally:
             self._pagemutex.release()
 
@@ -1279,7 +1279,8 @@ class BaseSite(ComparableMixin):
         return self.getUrl(address, data=predata)
 
     @deprecated
-    def postData(self, address, data, contentType=None, sysop=False,
+    @deprecated_args(contentType=None)
+    def postData(self, address, data, sysop=False,
                  compress=True, cookies=None):
         """DEPRECATED."""
         return self.getUrl(address, data=data)
@@ -2948,13 +2949,13 @@ class APISite(BaseSite):
     def _update_page(self, page, query):
         for pageitem in query:
             if not self.sametitle(pageitem['title'],
-                                  page.title(withSection=False)):
+                                  page.title(with_section=False)):
                 raise InconsistentTitleReceived(page, pageitem['title'])
             api.update_page(page, pageitem, query.props)
 
     def loadpageinfo(self, page, preload=False):
         """Load page info from api and store in page attributes."""
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         inprop = 'protection'
         if preload:
             inprop += '|preload'
@@ -2968,7 +2969,7 @@ class APISite(BaseSite):
     @need_extension('GeoData')
     def loadcoordinfo(self, page):
         """Load [[mw:Extension:GeoData]] info."""
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         query = self._generator(api.PropertyGenerator,
                                 type_arg="coordinates",
                                 titles=title.encode(self.encoding()),
@@ -2988,7 +2989,7 @@ class APISite(BaseSite):
 
         @raises APIError: PageImages extension is not installed
         """
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         query = self._generator(api.PropertyGenerator,
                                 type_arg='pageimages',
                                 titles=title.encode(self.encoding()),
@@ -2997,7 +2998,7 @@ class APISite(BaseSite):
 
     def loadpageprops(self, page):
         """Load page props for the given page."""
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         query = self._generator(api.PropertyGenerator,
                                 type_arg="pageprops",
                                 titles=title.encode(self.encoding()),
@@ -3018,7 +3019,7 @@ class APISite(BaseSite):
         if not isinstance(page, pywikibot.FilePage):
             raise TypeError('Page %s must be a FilePage.' % page)
 
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         args = {'titles': title,
                 'gufilterlocal': False,
                 }
@@ -3030,7 +3031,7 @@ class APISite(BaseSite):
 
         for pageitem in query:
             if not self.sametitle(pageitem['title'],
-                                  page.title(withSection=False)):
+                                  page.title(with_section=False)):
                     raise InconsistentTitleReceived(page, pageitem['title'])
 
             api.update_page(page, pageitem, query.props)
@@ -3062,7 +3063,7 @@ class APISite(BaseSite):
         @param url_param: see iiurlparam in [1]
 
         """
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         args = {'titles': title,
                 'iiurlwidth': url_width,
                 'iiurlheight': url_height,
@@ -3103,7 +3104,7 @@ class APISite(BaseSite):
 
         @raises APIError: Flow extension is not installed
         """
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         query = self._generator(api.PropertyGenerator,
                                 type_arg="flowinfo",
                                 titles=title.encode(self.encoding()),
@@ -3167,7 +3168,7 @@ class APISite(BaseSite):
         if hasattr(page, '_redirtarget'):
             return page._redirtarget
 
-        title = page.title(withSection=False)
+        title = page.title(with_section=False)
         query = self._simple_request(
             action='query',
             prop='info',
@@ -3337,7 +3338,7 @@ class APISite(BaseSite):
             # In case of duplicates, return the first entry.
             for priority, page in enumerate(sublist):
                 try:
-                    cache.setdefault(page.title(withSection=False),
+                    cache.setdefault(page.title(with_section=False),
                                      (priority, page))
                 except pywikibot.InvalidTitle:
                     pywikibot.exception()
@@ -3596,15 +3597,16 @@ class APISite(BaseSite):
         return NotImplementedError
 
     # following group of methods map more-or-less directly to API queries
-
-    def pagebacklinks(self, page, followRedirects=False, filterRedirects=None,
+    @deprecated_args(
+        followRedirects='follow_redirects', filterRedirects='filter_redirects')
+    def pagebacklinks(self, page, follow_redirects=False, filter_redirects=None,
                       namespaces=None, total=None, content=False):
         """Iterate all pages that link to the given page.
 
         @param page: The Page to get links to.
-        @param followRedirects: Also return links to redirects pointing to
+        @param follow_redirects: Also return links to redirects pointing to
             the given page.
-        @param filterRedirects: If True, only return redirects to the given
+        @param filter_redirects: If True, only return redirects to the given
             page. If False, only return non-redirect links. If None, return
             both (no filtering).
         @param namespaces: If present, only return links from the namespaces
@@ -3619,15 +3621,15 @@ class APISite(BaseSite):
         @raises TypeError: a namespace identifier has an inappropriate
             type such as NoneType or bool
         """
-        bltitle = page.title(withSection=False).encode(self.encoding())
+        bltitle = page.title(with_section=False).encode(self.encoding())
         blargs = {"gbltitle": bltitle}
-        if filterRedirects is not None:
-            blargs["gblfilterredir"] = (filterRedirects and "redirects" or
+        if filter_redirects is not None:
+            blargs['gblfilterredir'] = (filter_redirects and 'redirects' or
                                         "nonredirects")
         blgen = self._generator(api.PageGenerator, type_arg="backlinks",
                                 namespaces=namespaces, total=total,
                                 g_content=content, **blargs)
-        if followRedirects:
+        if follow_redirects:
             # links identified by MediaWiki as redirects may not really be,
             # so we have to check each "redirect" page and see if it
             # really redirects to this page
@@ -3648,21 +3650,21 @@ class APISite(BaseSite):
                     continue
                 if redir.getRedirectTarget() == page:
                     genlist[redir.title()] = self.pagebacklinks(
-                        redir, followRedirects=True,
-                        filterRedirects=filterRedirects,
+                        redir, follow_redirects=True,
+                        filter_redirects=filter_redirects,
                         namespaces=namespaces,
                         content=content
                     )
             return itertools.chain(*list(genlist.values()))
         return blgen
 
-    @deprecated_args(step=None)
-    def page_embeddedin(self, page, filterRedirects=None, namespaces=None,
+    @deprecated_args(step=None, filterRedirects='filter_redirects')
+    def page_embeddedin(self, page, filter_redirects=None, namespaces=None,
                         total=None, content=False):
         """Iterate all pages that embedded the given page as a template.
 
         @param page: The Page to get inclusions for.
-        @param filterRedirects: If True, only return redirects that embed
+        @param filter_redirects: If True, only return redirects that embed
             the given page. If False, only return non-redirect links. If
             None, return both (no filtering).
         @param namespaces: If present, only return links from the namespaces
@@ -3677,19 +3679,26 @@ class APISite(BaseSite):
             type such as NoneType or bool
         """
         eiargs = {"geititle":
-                  page.title(withSection=False).encode(self.encoding())}
-        if filterRedirects is not None:
-            eiargs["geifilterredir"] = (filterRedirects and "redirects" or
+                  page.title(with_section=False).encode(self.encoding())}
+        if filter_redirects is not None:
+            eiargs['geifilterredir'] = (filter_redirects and 'redirects' or
                                         "nonredirects")
         eigen = self._generator(api.PageGenerator, type_arg="embeddedin",
                                 namespaces=namespaces, total=total,
                                 g_content=content, **eiargs)
         return eigen
 
-    @deprecated_args(step=None)
-    def pagereferences(self, page, followRedirects=False, filterRedirects=None,
-                       withTemplateInclusion=True, onlyTemplateInclusion=False,
-                       namespaces=None, total=None, content=False):
+    @deprecated_args(
+        step=None, followRedirects='follow_redirects',
+        filterRedirects='filter_redirects',
+        withTemplateInclusion='with_template_inclusion',
+        onlyTemplateInclusion='only_template_inclusion'
+    )
+    def pagereferences(
+        self, page, follow_redirects=False, filter_redirects=None,
+        with_template_inclusion=True, only_template_inclusion=False,
+        namespaces=None, total=None, content=False
+    ):
         """
         Convenience method combining pagebacklinks and page_embeddedin.
 
@@ -3702,22 +3711,22 @@ class APISite(BaseSite):
         @raises TypeError: a namespace identifier has an inappropriate
             type such as NoneType or bool
         """
-        if onlyTemplateInclusion:
+        if only_template_inclusion:
             return self.page_embeddedin(page, namespaces=namespaces,
-                                        filterRedirects=filterRedirects,
+                                        filter_redirects=filter_redirects,
                                         total=total, content=content)
-        if not withTemplateInclusion:
-            return self.pagebacklinks(page, followRedirects=followRedirects,
-                                      filterRedirects=filterRedirects,
+        if not with_template_inclusion:
+            return self.pagebacklinks(page, follow_redirects=follow_redirects,
+                                      filter_redirects=filter_redirects,
                                       namespaces=namespaces,
                                       total=total, content=content)
         return itertools.islice(
             itertools.chain(
                 self.pagebacklinks(
-                    page, followRedirects, filterRedirects,
+                    page, follow_redirects, filter_redirects,
                     namespaces=namespaces, content=content),
                 self.page_embeddedin(
-                    page, filterRedirects, namespaces=namespaces,
+                    page, filter_redirects, namespaces=namespaces,
                     content=content)
             ), total)
 
@@ -3743,7 +3752,7 @@ class APISite(BaseSite):
         if hasattr(page, "_pageid"):
             plargs['pageids'] = str(page._pageid)
         else:
-            pltitle = page.title(withSection=False).encode(self.encoding())
+            pltitle = page.title(with_section=False).encode(self.encoding())
             plargs['titles'] = pltitle
         plgen = self._generator(api.PageGenerator, type_arg="links",
                                 namespaces=namespaces, total=total,
@@ -3765,7 +3774,7 @@ class APISite(BaseSite):
             clargs['pageids'] = str(page._pageid)
         else:
             clargs['titles'] = page.title(
-                withSection=False).encode(self.encoding())
+                with_section=False).encode(self.encoding())
         clgen = self._generator(api.PageGenerator,
                                 type_arg='categories', total=total,
                                 g_content=content, **clargs)
@@ -3780,7 +3789,7 @@ class APISite(BaseSite):
             description page, not the image itself
 
         """
-        imtitle = page.title(withSection=False).encode(self.encoding())
+        imtitle = page.title(with_section=False).encode(self.encoding())
         imgen = self._generator(api.PageGenerator, type_arg="images",
                                 titles=imtitle, total=total,
                                 g_content=content)
@@ -3801,7 +3810,7 @@ class APISite(BaseSite):
         @raises TypeError: a namespace identifier has an inappropriate
             type such as NoneType or bool
         """
-        tltitle = page.title(withSection=False).encode(self.encoding())
+        tltitle = page.title(with_section=False).encode(self.encoding())
         tlgen = self._generator(api.PageGenerator, type_arg="templates",
                                 titles=tltitle, namespaces=namespaces,
                                 total=total, g_content=content)
@@ -3869,7 +3878,7 @@ class APISite(BaseSite):
             raise Error(
                 u"categorymembers: non-Category page '%s' specified"
                 % category.title())
-        cmtitle = category.title(withSection=False).encode(self.encoding())
+        cmtitle = category.title(with_section=False).encode(self.encoding())
         cmargs = {'type_arg': "categorymembers", 'gcmtitle': cmtitle,
                   'gcmprop': "ids|title|sortkey"}
         if sortby in ["sortkey", "timestamp"]:
@@ -4068,7 +4077,7 @@ class APISite(BaseSite):
             self.login(sysop=sysop)
             rvargs[u"rvtoken"] = "rollback"
         if revids is None:
-            rvtitle = page.title(withSection=False).encode(self.encoding())
+            rvtitle = page.title(with_section=False).encode(self.encoding())
             rvargs[u"titles"] = rvtitle
         else:
             if isinstance(revids, (int, basestring)):
@@ -4105,7 +4114,7 @@ class APISite(BaseSite):
 
         for pagedata in rvgen:
             if not self.sametitle(pagedata['title'],
-                                  page.title(withSection=False)):
+                                  page.title(with_section=False)):
                 raise InconsistentTitleReceived(page, pagedata['title'])
             if "missing" in pagedata:
                 raise NoPage(page)
@@ -4128,7 +4137,7 @@ class APISite(BaseSite):
         @param include_obsolete: if true, yield even Link objects whose
                                  site is obsolete
         """
-        lltitle = page.title(withSection=False)
+        lltitle = page.title(with_section=False)
         llquery = self._generator(api.PropertyGenerator,
                                   type_arg="langlinks",
                                   titles=lltitle.encode(self.encoding()),
@@ -4150,7 +4159,7 @@ class APISite(BaseSite):
     @deprecated_args(step=None)
     def page_extlinks(self, page, total=None):
         """Iterate all external links on page, yielding URL strings."""
-        eltitle = page.title(withSection=False)
+        eltitle = page.title(with_section=False)
         elquery = self._generator(api.PropertyGenerator, type_arg="extlinks",
                                   titles=eltitle.encode(self.encoding()),
                                   total=total)
@@ -4164,7 +4173,7 @@ class APISite(BaseSite):
 
     def getcategoryinfo(self, category):
         """Retrieve data on contents of category."""
-        cititle = category.title(withSection=False)
+        cititle = category.title(with_section=False)
         ciquery = self._generator(api.PropertyGenerator,
                                   type_arg="categoryinfo",
                                   titles=cititle.encode(self.encoding()))
@@ -4531,7 +4540,7 @@ class APISite(BaseSite):
         @raises TypeError: a namespace identifier has an inappropriate
             type such as NoneType or bool
         """
-        iuargs = {'giutitle': image.title(withSection=False)}
+        iuargs = {'giutitle': image.title(with_section=False)}
         if filterredir is not None:
             iuargs['giufilterredir'] = ('redirects' if filterredir else
                                         'nonredirects')
@@ -4636,12 +4645,15 @@ class APISite(BaseSite):
     @deprecated_args(returndict=None, nobots=None, rcshow=None, rcprop=None,
                      rctype='changetype', revision=None, repeat=None,
                      rcstart='start', rcend='end', rcdir=None, step=None,
-                     includeredirects='showRedirects', namespace='namespaces',
-                     rcnamespace='namespaces', number='total', rclimit='total')
+                     includeredirects='show_redirects', namespace='namespaces',
+                     rcnamespace='namespaces', number='total', rclimit='total',
+                     showMinor='show_minor', showBot='show_bot',
+                     showAnon='show_anon', showRedirects='show_redirects',
+                     showPatrolled='show_patrolled', topOnly='top_only')
     def recentchanges(self, start=None, end=None, reverse=False,
                       namespaces=None, pagelist=None, changetype=None,
-                      showMinor=None, showBot=None, showAnon=None,
-                      showRedirects=None, showPatrolled=None, topOnly=False,
+                      show_minor=None, show_bot=None, show_anon=None,
+                      show_redirects=None, show_patrolled=None, top_only=False,
                       total=None, user=None, excludeuser=None, tag=None):
         """Iterate recent changes.
 
@@ -4661,24 +4673,25 @@ class APISite(BaseSite):
             edits to existing pages, "new" for new pages, "log" for log
             entries)
         @type changetype: basestring
-        @param showMinor: if True, only list minor edits; if False, only list
+        @param show_minor: if True, only list minor edits; if False, only list
             non-minor edits; if None, list all
-        @type showMinor: bool or None
-        @param showBot: if True, only list bot edits; if False, only list
+        @type show_minor: bool or None
+        @param show_bot: if True, only list bot edits; if False, only list
             non-bot edits; if None, list all
-        @type showBot: bool or None
-        @param showAnon: if True, only list anon edits; if False, only list
+        @type show_bot: bool or None
+        @param show_anon: if True, only list anon edits; if False, only list
             non-anon edits; if None, list all
-        @type showAnon: bool or None
-        @param showRedirects: if True, only list edits to redirect pages; if
+        @type show_anon: bool or None
+        @param show_redirects: if True, only list edits to redirect pages; if
             False, only list edits to non-redirect pages; if None, list all
-        @type showRedirects: bool or None
-        @param showPatrolled: if True, only list patrolled edits; if False,
+        @type show_redirects: bool or None
+        @param show_patrolled: if True, only list patrolled edits; if False,
             only list non-patrolled edits; if None, list all
-        @type showPatrolled: bool or None
-        @param topOnly: if True, only list changes that are the latest revision
+        @type show_patrolled: bool or None
+        @param top_only: if True, only list changes that are the latest
+        revision
             (default False)
-        @type topOnly: bool
+        @type top_only: bool
         @param user: if not None, only list edits by this user or users
         @type user: basestring|list
         @param excludeuser: if not None, exclude edits by this user or users
@@ -4696,7 +4709,7 @@ class APISite(BaseSite):
                                 rcprop="user|comment|timestamp|title|ids"
                                        '|sizes|redirect|loginfo|flags|tags',
                                 namespaces=namespaces,
-                                total=total, rctoponly=topOnly)
+                                total=total, rctoponly=top_only)
         if start is not None:
             rcgen.request["rcstart"] = start
         if end is not None:
@@ -4708,19 +4721,19 @@ class APISite(BaseSite):
                 pywikibot.warning(
                     u"recentchanges: pagelist option is disabled; ignoring.")
             else:
-                rcgen.request["rctitles"] = (p.title(withSection=False)
+                rcgen.request["rctitles"] = (p.title(with_section=False)
                                              for p in pagelist)
         if changetype:
             rcgen.request["rctype"] = changetype
-        filters = {'minor': showMinor,
-                   'bot': showBot,
-                   'anon': showAnon,
-                   'redirect': showRedirects,
+        filters = {'minor': show_minor,
+                   'bot': show_bot,
+                   'anon': show_anon,
+                   'redirect': show_redirects,
                    }
-        if showPatrolled is not None and (
+        if show_patrolled is not None and (
                 self.has_right('patrol') or self.has_right('patrolmarks')):
             rcgen.request['rcprop'] += ['patrolled']
-            filters['patrolled'] = showPatrolled
+            filters['patrolled'] = show_patrolled
         rcgen.request['rcshow'] = api.OptionSet(self, 'recentchanges', 'show',
                                                 filters)
 
@@ -4790,9 +4803,9 @@ class APISite(BaseSite):
             srgen.request['gsrredirects'] = get_redirects
         return srgen
 
-    @deprecated_args(step=None)
+    @deprecated_args(step=None, showMinor='show_minor')
     def usercontribs(self, user=None, userprefix=None, start=None, end=None,
-                     reverse=False, namespaces=None, showMinor=None,
+                     reverse=False, namespaces=None, show_minor=None,
                      total=None, top_only=False):
         """Iterate contributions by a particular user.
 
@@ -4808,7 +4821,7 @@ class APISite(BaseSite):
         @type namespaces: iterable of basestring or Namespace key,
             or a single instance of those types. May be a '|' separated
             list of namespace identifiers.
-        @param showMinor: if True, iterate only minor edits; if False and
+        @param show_minor: if True, iterate only minor edits; if False and
             not None, iterate only non-minor edits (default: iterate both)
         @param total: limit result to this number of pages
         @type total: int
@@ -4841,14 +4854,16 @@ class APISite(BaseSite):
         if reverse:
             ucgen.request["ucdir"] = "newer"
         option_set = api.OptionSet(self, 'usercontribs', 'show')
-        option_set['minor'] = showMinor
+        option_set['minor'] = show_minor
         ucgen.request['ucshow'] = option_set
         return ucgen
 
-    @deprecated_args(step=None)
+    @deprecated_args(
+        step=None, showMinor='show_minor', showBot='show_bot',
+        showAnon='show_anon')
     def watchlist_revs(self, start=None, end=None, reverse=False,
-                       namespaces=None, showMinor=None, showBot=None,
-                       showAnon=None, total=None):
+                       namespaces=None, show_minor=None, show_bot=None,
+                       show_anon=None, total=None):
         """Iterate revisions to pages on the bot user's watchlist.
 
         Iterated values will be in same format as recentchanges.
@@ -4860,11 +4875,11 @@ class APISite(BaseSite):
         @type namespaces: iterable of basestring or Namespace key,
             or a single instance of those types. May be a '|' separated
             list of namespace identifiers.
-        @param showMinor: if True, only list minor edits; if False (and not
+        @param show_minor: if True, only list minor edits; if False (and not
             None), only list non-minor edits
-        @param showBot: if True, only list bot edits; if False (and not
+        @param show_bot: if True, only list bot edits; if False (and not
             None), only list non-bot edits
-        @param showAnon: if True, only list anon edits; if False (and not
+        @param show_anon: if True, only list anon edits; if False (and not
             None), only list non-anon edits
         @raises KeyError: a namespace identifier was not resolved
         @raises TypeError: a namespace identifier has an inappropriate
@@ -4885,9 +4900,9 @@ class APISite(BaseSite):
             wlgen.request["wlend"] = end
         if reverse:
             wlgen.request["wldir"] = "newer"
-        filters = {'minor': showMinor,
-                   'bot': showBot,
-                   'anon': showAnon}
+        filters = {'minor': show_minor,
+                   'bot': show_bot,
+                   'anon': show_anon}
         wlgen.request['wlshow'] = api.OptionSet(self, 'watchlist', 'show',
                                                 filters)
         return wlgen
@@ -4939,7 +4954,7 @@ class APISite(BaseSite):
                         % self.user())
 
         drgen = self._generator(api.ListGenerator, type_arg="deletedrevs",
-                                titles=page.title(withSection=False),
+                                titles=page.title(with_section=False),
                                 drprop="revid|user|comment|minor",
                                 total=total)
         if get_text:
@@ -5188,7 +5203,7 @@ class APISite(BaseSite):
                         if isinstance(self._ep_errors[err.code], basestring):
                             errdata = {
                                 'site': self,
-                                'title': page.title(withSection=False),
+                                'title': page.title(with_section=False),
                                 'user': self.user(),
                                 'info': err.info
                             }
@@ -5416,7 +5431,7 @@ class APISite(BaseSite):
         @return: Page object with the new title
         @rtype: pywikibot.Page
         """
-        oldtitle = page.title(withSection=False)
+        oldtitle = page.title(with_section=False)
         newlink = pywikibot.Link(newtitle, self)
         newpage = pywikibot.Page(newlink)
         if newlink.namespace:
@@ -5491,7 +5506,7 @@ class APISite(BaseSite):
         if "talkmove-error-code" in result["move"]:
             pywikibot.warning(
                 u"movepage: Talk page %s not moved"
-                % (page.toggleTalkPage().title(asLink=True)))
+                % (page.toggleTalkPage().title(as_link=True)))
         return pywikibot.Page(page, newtitle)
 
     # catalog of rollback errors for use in error messages
@@ -5518,7 +5533,7 @@ class APISite(BaseSite):
         if len(page._revisions) < 2:
             raise Error(
                 u"Rollback of %s aborted; load revision history first."
-                % page.title(asLink=True))
+                % page.title(as_link=True))
         last_rev = page.latest_revision
         last_user = last_rev.user
         for rev in sorted(page._revisions.values(), reverse=True,
@@ -5529,7 +5544,7 @@ class APISite(BaseSite):
         else:
             raise Error(
                 u"Rollback of %s aborted; only one user in revision history."
-                % page.title(asLink=True))
+                % page.title(as_link=True))
         parameters = merge_unique_dicts(kwargs, action='rollback',
                                         title=page,
                                         token=self.tokens['rollback'],
@@ -5541,7 +5556,7 @@ class APISite(BaseSite):
         except api.APIError as err:
             errdata = {
                 'site': self,
-                'title': page.title(withSection=False),
+                'title': page.title(with_section=False),
                 'user': self.user(),
             }
             if err.code in self._rb_errors:
@@ -5587,7 +5602,7 @@ class APISite(BaseSite):
         except api.APIError as err:
             errdata = {
                 'site': self,
-                'title': page.title(withSection=False),
+                'title': page.title(with_section=False),
                 'user': self.user(),
             }
             if err.code in self._dl_errors:
@@ -5628,7 +5643,7 @@ class APISite(BaseSite):
         except api.APIError as err:
             errdata = {
                 'site': self,
-                'title': page.title(withSection=False),
+                'title': page.title(with_section=False),
                 'user': self.user(),
             }
             if err.code in self._dl_errors:
@@ -6003,7 +6018,7 @@ class APISite(BaseSite):
                 'The "hash_found" parameter in "getFilesFromAnHash" and '
                 '"getImagesFromAnHash" are not optional.')
             return
-        return [image.title(withNamespace=False)
+        return [image.title(with_namespace=False)
                 for image in self.allimages(sha1=hash_found)]
 
     @deprecated('Site().allimages')
@@ -6197,7 +6212,7 @@ class APISite(BaseSite):
             text = comment
         token = self.tokens['edit']
         result = None
-        file_page_title = filepage.title(withNamespace=False)
+        file_page_title = filepage.title(with_namespace=False)
         file_size = None
         offset = _offset
         # make sure file actually exists
@@ -6471,12 +6486,15 @@ class APISite(BaseSite):
                      namespace="namespaces",
                      rcshow=None,
                      rc_show=None,
-                     get_redirect=None)
-    @deprecated_args(step=None)
+                     get_redirect=None,
+                     showBot='show_bot',
+                     showRedirects='show_redirects',
+                     showPatrolled='show_patrolled',
+                     step=None)
     def newpages(self, user=None, returndict=False,
-                 start=None, end=None, reverse=False, showBot=False,
-                 showRedirects=False, excludeuser=None,
-                 showPatrolled=None, namespaces=None, total=None):
+                 start=None, end=None, reverse=False, show_bot=False,
+                 show_redirects=False, excludeuser=None,
+                 show_patrolled=None, namespaces=None, total=None):
         """Yield new articles (as Page objects) from recent changes.
 
         Starts with the newest article and fetches the number of articles
@@ -6505,8 +6523,8 @@ class APISite(BaseSite):
         gen = self.recentchanges(
             start=start, end=end, reverse=reverse,
             namespaces=namespaces, changetype="new", user=user,
-            excludeuser=excludeuser, showBot=showBot,
-            showRedirects=showRedirects, showPatrolled=showPatrolled,
+            excludeuser=excludeuser, show_bot=show_bot,
+            show_redirects=show_redirects, show_patrolled=show_patrolled,
             total=total
         )
         for pageitem in gen:
@@ -7641,7 +7659,7 @@ class DataSite(APISite):
                 else:
                     if p.site == self and p.namespace() in (
                             self.item_namespace, self.property_namespace):
-                        req['ids'].append(p.title(withNamespace=False))
+                        req['ids'].append(p.title(with_namespace=False))
                     else:
                         assert p.site.has_data_repository, \
                             'Site must have a data repository'
@@ -8044,16 +8062,18 @@ class DataSite(APISite):
         return data
 
     @must_be(group='user')
-    @deprecated_args(ignoreconflicts='ignore_conflicts')
-    def mergeItems(self, fromItem, toItem, ignore_conflicts=None,
+    @deprecated_args(
+        fromItem='from_item', toItem='to_item',
+        ignoreconflicts='ignore_conflicts')
+    def mergeItems(self, from_item, to_item, ignore_conflicts=None,
                    summary=None, bot=True):
         """
         Merge two items together.
 
-        @param fromItem: Item to merge from
-        @type fromItem: pywikibot.ItemPage
-        @param toItem: Item to merge into
-        @type toItem: pywikibot.ItemPage
+        @param from_item: Item to merge from
+        @type from_item: pywikibot.ItemPage
+        @param to_item: Item to merge into
+        @type to_item: pywikibot.ItemPage
         @param ignore_conflicts: Which type of conflicts
             ('description', 'sitelink', and 'statement')
             should be ignored
@@ -8067,8 +8087,8 @@ class DataSite(APISite):
         """
         params = {
             'action': 'wbmergeitems',
-            'fromid': fromItem.getID(),
-            'toid': toItem.getID(),
+            'fromid': from_item.getID(),
+            'toid': to_item.getID(),
             'ignoreconflicts': ignore_conflicts,
             'token': self.tokens['edit'],
             'summary': summary,

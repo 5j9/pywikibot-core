@@ -36,7 +36,8 @@ from pywikibot.exceptions import (
     Error, TimeoutError, InvalidTitle, UnsupportedPage
 )
 from pywikibot.tools import (
-    MediaWikiVersion, deprecated, itergroup, ip, PY2, PYTHON_VERSION,
+    MediaWikiVersion, deprecated, deprecated_args,
+    itergroup, ip, PY2, PYTHON_VERSION,
     getargspec, UnicodeType
 )
 from pywikibot.tools.formatter import color_format
@@ -1557,7 +1558,7 @@ class Request(MutableMapping):
             return value.strftime(pywikibot.Timestamp.ISO8601Format)
         elif isinstance(value, pywikibot.page.BasePage):
             assert(value.site == self.site)
-            return value.title(withSection=False)
+            return value.title(with_section=False)
         else:
             return unicode(value)
 
@@ -3058,7 +3059,8 @@ class LoginManager(login.LoginManager):
 
     """Supply getCookie() method to use API interface."""
 
-    def getCookie(self, remember=True, captchaId=None, captchaAnswer=None):
+    @deprecated_args(captchaId='captcha_id', captchaAnswer='captcha_answer')
+    def getCookie(self, remember=True, captcha_id=None, captcha_answer=None):
         """Login to the site.
 
         Parameters are all ignored.

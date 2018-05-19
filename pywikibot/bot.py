@@ -1288,7 +1288,7 @@ class BaseBot(OptionHandler):
         """
         if oldtext.rstrip() == newtext.rstrip():
             pywikibot.output(u'No changes were needed on %s'
-                             % page.title(asLink=True))
+                             % page.title(as_link=True))
             return
 
         self.current_page = page
@@ -2059,7 +2059,7 @@ class WikidataBot(Bot, ExistingPageBot):
         if not summary:
             # FIXME: i18n
             summary = ('Bot: New item with sitelink from %s'
-                       % page.title(asLink=True, insite=self.repo))
+                       % page.title(as_link=True, insite=self.repo))
 
         if data is None:
             data = {}

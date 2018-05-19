@@ -14,13 +14,16 @@ function/method instead.
 from __future__ import absolute_import, unicode_literals
 
 from pywikibot import Category
-from pywikibot.tools import ModuleDeprecationWrapper
+from pywikibot.tools import ModuleDeprecationWrapper, deprecated_args
 
 
-def change_category(article, oldCat, newCat, comment=None, sortKey=None,
-                    inPlace=True):
+@deprecated_args(
+    oldCat='old_cat', newCat='new_cat', sortKey='sort_key', inPlace='in_place')
+def change_category(article, old_cat, new_cat, comment=None, sort_key=None,
+                    in_place=True):
     """Change the category of the article."""
-    return article.change_category(oldCat, newCat, comment, sortKey, inPlace)
+    return article.change_category(
+        old_cat, new_cat, comment, sort_key, in_place)
 
 
 __all__ = ('Category', 'change_category',)

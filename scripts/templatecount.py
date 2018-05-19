@@ -145,7 +145,7 @@ class TemplateCountRobot(object):
         for template in templates:
             transcludingArray = []
             gen = pywikibot.Page(mysite, template, ns=mytpl).getReferences(
-                namespaces=namespaces, onlyTemplateInclusion=True)
+                namespaces=namespaces, only_template_inclusion=True)
             for page in gen:
                 transcludingArray.append(page)
             yield template, transcludingArray

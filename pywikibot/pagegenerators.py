@@ -606,7 +606,7 @@ class GeneratorFactory(object):
                                              categoryname)
         cat = pywikibot.Category(pywikibot.Link(categoryname,
                                                 source=self.site,
-                                                defaultNamespace=14))
+                                                default_namespace=14))
         return cat, startfrom
 
     @deprecated_args(arg='category')
@@ -922,9 +922,9 @@ class GeneratorFactory(object):
                 value = pywikibot.input(
                     u'Pages that transclude which page should be processed?')
             page = pywikibot.Page(pywikibot.Link(value,
-                                                 defaultNamespace=10,
+                                                 default_namespace=10,
                                                  source=self.site))
-            gen = ReferringPageGenerator(page, onlyTemplateInclusion=True)
+            gen = ReferringPageGenerator(page, only_template_inclusion=True)
         elif arg == '-start':
             if not value:
                 value = '!'
@@ -1236,13 +1236,16 @@ def NewpagesPageGenerator(site=None, namespaces=[0], total=None):
         yield pywikibot.Page(pywikibot.Link(item["title"], site))
 
 
-@deprecated_args(nobots=None, step=None)
+@deprecated_args(
+    nobots=None, step=None, showMinor='show_minor', showBot='show_bot',
+    showAnon='show_anon', showRedirects='show_redirects',
+    showPatrolled='show_patrolled', topOnly='top_only')
 def RecentChangesPageGenerator(start=None, end=None, reverse=False,
                                namespaces=None, pagelist=None,
-                               changetype=None, showMinor=None,
-                               showBot=None, showAnon=None,
-                               showRedirects=None, showPatrolled=None,
-                               topOnly=False, total=None,
+                               changetype=None, show_minor=None,
+                               show_bot=None, show_anon=None,
+                               show_redirects=None, show_patrolled=None,
+                               top_only=False, total=None,
                                user=None, excludeuser=None, site=None,
                                tag=None, _filter_unique=None):
     """
@@ -1260,24 +1263,24 @@ def RecentChangesPageGenerator(start=None, end=None, reverse=False,
         edits to existing pages, "new" for new pages, "log" for log
         entries)
     @type changetype: basestring
-    @param showMinor: if True, only list minor edits; if False, only list
+    @param show_minor: if True, only list minor edits; if False, only list
         non-minor edits; if None, list all
-    @type showMinor: bool or None
-    @param showBot: if True, only list bot edits; if False, only list
+    @type show_minor: bool or None
+    @param show_bot: if True, only list bot edits; if False, only list
         non-bot edits; if None, list all
-    @type showBot: bool or None
-    @param showAnon: if True, only list anon edits; if False, only list
+    @type show_bot: bool or None
+    @param show_anon: if True, only list anon edits; if False, only list
         non-anon edits; if None, list all
-    @type showAnon: bool or None
-    @param showRedirects: if True, only list edits to redirect pages; if
+    @type show_anon: bool or None
+    @param show_redirects: if True, only list edits to redirect pages; if
         False, only list edits to non-redirect pages; if None, list all
-    @type showRedirects: bool or None
-    @param showPatrolled: if True, only list patrolled edits; if False,
+    @type show_redirects: bool or None
+    @param show_patrolled: if True, only list patrolled edits; if False,
         only list non-patrolled edits; if None, list all
-    @type showPatrolled: bool or None
-    @param topOnly: if True, only list changes that are the latest revision
+    @type show_patrolled: bool or None
+    @param top_only: if True, only list changes that are the latest revision
         (default False)
-    @type topOnly: bool
+    @type top_only: bool
     @param user: if not None, only list edits by this user or users
     @type user: basestring|list
     @param excludeuser: if not None, exclude edits by this user or users
@@ -1292,11 +1295,11 @@ def RecentChangesPageGenerator(start=None, end=None, reverse=False,
 
     gen = site.recentchanges(start=start, end=end, reverse=reverse,
                              namespaces=namespaces, pagelist=pagelist,
-                             changetype=changetype, showMinor=showMinor,
-                             showBot=showBot, showAnon=showAnon,
-                             showRedirects=showRedirects,
-                             showPatrolled=showPatrolled,
-                             topOnly=topOnly, total=total,
+                             changetype=changetype, show_minor=show_minor,
+                             show_bot=show_bot, show_anon=show_anon,
+                             show_redirects=show_redirects,
+                             show_patrolled=show_patrolled,
+                             top_only=top_only, total=total,
                              user=user, excludeuser=excludeuser, tag=tag)
 
     gen.request['rcprop'] = 'title'
@@ -1326,16 +1329,18 @@ def UnconnectedPageGenerator(site=None, total=None):
     return site.unconnected_pages(total=total)
 
 
-@deprecated_args(referredImagePage='referredFilePage', step=None)
-def FileLinksGenerator(referredFilePage, total=None, content=False):
-    """Yield Pages on which the file referredFilePage is displayed."""
-    return referredFilePage.usingPages(total=total, content=content)
+@deprecated_args(
+    referredImagePage='referred_file_page', step=None,
+    referredFilePage='referred_file_page')
+def FileLinksGenerator(referred_file_page, total=None, content=False):
+    """Yield Pages on which the file referred_file_page is displayed."""
+    return referred_file_page.usingPages(total=total, content=content)
 
 
-@deprecated_args(step=None)
-def ImagesPageGenerator(pageWithImages, total=None, content=False):
-    """Yield FilePages displayed on pageWithImages."""
-    return pageWithImages.imagelinks(total=total, content=content)
+@deprecated_args(step=None, pageWithImages='page_with_images')
+def ImagesPageGenerator(page_with_images, total=None, content=False):
+    """Yield FilePages displayed on page_with_images."""
+    return page_with_images.imagelinks(total=total, content=content)
 
 
 def InterwikiPageGenerator(page):
@@ -1351,16 +1356,19 @@ def LanguageLinksPageGenerator(page, total=None):
         yield pywikibot.Page(link)
 
 
-@deprecated_args(step=None)
-def ReferringPageGenerator(referredPage, followRedirects=False,
-                           withTemplateInclusion=True,
-                           onlyTemplateInclusion=False,
+@deprecated_args(
+    step=None, referredPage='referred_page', followRedirects='follow_redirects',
+    withTemplateInclusion='with_template_inclusion',
+    onlyTemplateInclusion='only_template_inclusion')
+def ReferringPageGenerator(referred_page, follow_redirects=False,
+                           with_template_inclusion=True,
+                           only_template_inclusion=False,
                            total=None, content=False):
     """Yield all pages referring to a specific page."""
-    return referredPage.getReferences(
-        follow_redirects=followRedirects,
-        withTemplateInclusion=withTemplateInclusion,
-        onlyTemplateInclusion=onlyTemplateInclusion,
+    return referred_page.getReferences(
+        follow_redirects=follow_redirects,
+        with_template_inclusion=with_template_inclusion,
+        only_template_inclusion=only_template_inclusion,
         total=total, content=content)
 
 
@@ -1422,26 +1430,27 @@ def SubCategoriesPageGenerator(category, recurse=False, start=None,
     # TODO: page generator could be modified to use cmstartsortkey ...
     for s in category.subcategories(recurse=recurse,
                                     total=total, content=content):
-        if start is None or s.title(withNamespace=False) >= start:
+        if start is None or s.title(with_namespace=False) >= start:
             yield s
 
 
-@deprecated_args(step=None)
-def LinkedPageGenerator(linkingPage, total=None, content=False):
+@deprecated_args(step=None, linkingPage='linking_page')
+def LinkedPageGenerator(linking_page, total=None, content=False):
     """Yield all pages linked from a specific page.
 
     See L{pywikibot.page.BasePage.linkedPages} for details.
 
-    @param linkingPage: the page that links to the pages we want
-    @type linkingPage: L{pywikibot.Page}
+    @param linking_page: the page that links to the pages we want
+    @type linking_page: L{pywikibot.Page}
     @param total: the total number of pages to iterate
     @type total: int
     @param content: if True, retrieve the current content of each linked page
     @type content: bool
-    @return: a generator that yields Page objects of pages linked to linkingPage
+    @return: a generator that yields Page objects of pages linked to
+    linking_page
     @rtype: generator
     """
-    return linkingPage.linkedPages(total=total, content=content)
+    return linking_page.linkedPages(total=total, content=content)
 
 
 def TextfilePageGenerator(filename=None, site=None):
@@ -1661,7 +1670,7 @@ class ItemClaimFilter(object):
                     cls = pywikibot.PropertyPage
                 else:
                     cls = pywikibot.ItemPage
-                page = cls(page.site, page.title(withNamespace=False))
+                page = cls(page.site, page.title(with_namespace=False))
             else:
                 try:
                     page = pywikibot.ItemPage.fromPage(page)
@@ -1794,7 +1803,7 @@ class RegexFilter(object):
             quantifier = 'none'
         reg = cls.__precompile(regex, re.I)
         for page in generator:
-            title = page.title(withNamespace=not ignore_namespace)
+            title = page.title(with_namespace=not ignore_namespace)
             if cls.__filter_match(reg, title, quantifier):
                 yield page
 
@@ -1956,7 +1965,7 @@ def UserEditFilterGenerator(generator, username, timestamp=None, skip=False,
         if bool(contribs[username]) is not bool(skip):  # xor operation
             yield page
         elif show_filtered:
-            pywikibot.output(u'Skipping %s' % page.title(asLink=True))
+            pywikibot.output(u'Skipping %s' % page.title(as_link=True))
 
 
 @deprecated('itertools.chain(*iterables)')
@@ -2816,7 +2825,7 @@ def DayPageGenerator(start_month=1, end_month=12, site=None, year=2000):
         site = pywikibot.Site()
     fd = date.FormatDate(site)
     firstPage = pywikibot.Page(site, fd(start_month, 1))
-    pywikibot.output(u"Starting with %s" % firstPage.title(asLink=True))
+    pywikibot.output(u"Starting with %s" % firstPage.title(as_link=True))
     for month in range(start_month, end_month + 1):
         for day in range(1, calendar.monthrange(year, month)[1] + 1):
             yield pywikibot.Page(pywikibot.Link(fd(month, day), site))

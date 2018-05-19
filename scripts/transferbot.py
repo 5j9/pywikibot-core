@@ -139,29 +139,29 @@ def main(*args):
         edithistpage = pywikibot.Page(tosite, prefix + page.title()
                                       + '/edithistory')
         summary = 'Moved page from {old} ([[{new}/edithistory|history]])'\
-                  .format(old=page.title(asLink=True, insite=tosite),
+                  .format(old=page.title(as_link=True, insite=tosite),
                           new=targetpage.title() if not
                           targetpage.namespace().subpages else '')
 
         if targetpage.exists() and not overwrite:
             pywikibot.output(
                 u"Skipped %s (target page %s exists)" % (
-                    page.title(asLink=True),
-                    targetpage.title(asLink=True)
+                    page.title(as_link=True),
+                    targetpage.title(as_link=True)
                 )
             )
             continue
 
         pywikibot.output(u"Moving %s to %s..."
-                         % (page.title(asLink=True),
-                            targetpage.title(asLink=True)))
+                         % (page.title(as_link=True),
+                            targetpage.title(as_link=True)))
 
         pywikibot.log("Getting page text.")
         text = page.get(get_redirect=True)
         text += ("<noinclude>\n\n<small>This page was moved from %s. It's "
                  "edit history can be viewed at %s</small></noinclude>"
-                 % (page.title(asLink=True, insite=targetpage.site),
-                    edithistpage.title(asLink=True, insite=targetpage.site)))
+                 % (page.title(as_link=True, insite=targetpage.site),
+                    edithistpage.title(as_link=True, insite=targetpage.site)))
 
         pywikibot.log("Getting edit history.")
         historytable = page.getVersionHistoryTable()

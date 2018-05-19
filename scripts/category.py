@@ -201,32 +201,32 @@ class CategoryPreprocess(BaseBot):
                         redir_target.text = ''
                         pywikibot.output('Redirect target %s does not exist '
                                          'yet; creating.'
-                                         % redir_target.title(asLink=True))
+                                         % redir_target.title(as_link=True))
                         return redir_target
                     elif self.edit_redirects:
                         return page
                     else:
                         pywikibot.warning('Redirect target %s can not '
                                           'be modified; skipping.'
-                                          % redir_target.title(asLink=True))
+                                          % redir_target.title(as_link=True))
                         return
                 elif self.edit_redirects:
                     return page
                 else:
                     pywikibot.warning('Page %s is a redirect to %s; skipping.'
-                                      % (page.title(asLink=True),
-                                         redir_target.title(asLink=True)))
+                                      % (page.title(as_link=True),
+                                         redir_target.title(as_link=True)))
                     return
             else:
                 return page
         elif self.create:
             page.text = ''
             pywikibot.output('Page %s does not exist yet; creating.'
-                             % page.title(asLink=True))
+                             % page.title(as_link=True))
             return page
         else:
             pywikibot.warning('Page %s does not exist; skipping.'
-                              % page.title(asLink=True))
+                              % page.title(as_link=True))
             return
 
     def determine_template_target(self, page):
@@ -256,7 +256,7 @@ class CategoryPreprocess(BaseBot):
             if tmpl != []:
                 templates = page.templatesWithParams()
                 for template in templates:
-                    if template[0].title(withNamespace=False).lower() in tmpl:
+                    if template[0].title(with_namespace=False).lower() in tmpl:
                         doc_page = pywikibot.Page(page.site, template[1])
                         if doc_page.exists():
                             page = doc_page
@@ -467,14 +467,14 @@ class CategoryAddBot(MultipleSitesBot, CategoryPreprocess):
         else:
             if self.sort:
                 catpl = self.sorted_by_last_name(catpl, self.current_page)
-            pywikibot.output(u'Adding %s' % catpl.title(asLink=True))
+            pywikibot.output(u'Adding %s' % catpl.title(as_link=True))
             if page.namespace() == page.site.namespaces.TEMPLATE:
                 tagname = 'noinclude'
                 if self.includeonly == ['includeonly']:
                     tagname = 'includeonly'
                 tagnameregexp = re.compile(r'(.*)(<\/{0}>)'.format(tagname),
                                            re.I | re.DOTALL)
-                categorytitle = catpl.title(asLink=True, allowInterwiki=False)
+                categorytitle = catpl.title(as_link=True, allow_interwiki=False)
                 if tagnameregexp.search(text):
                     # add category into the <includeonly> tag in the
                     # template document page or the <noinclude> tag
@@ -498,13 +498,13 @@ class CategoryAddBot(MultipleSitesBot, CategoryPreprocess):
                 comment = i18n.twtranslate(self.current_page.site,
                                            'category-adding',
                                            {'newcat': catpl.title(
-                                               withNamespace=False)})
+                                               with_namespace=False)})
             try:
                 self.userPut(self.current_page, old_text, text,
                              summary=comment)
             except pywikibot.PageSaveRelatedError as error:
                 pywikibot.output(u'Page %s not saved: %s'
-                                 % (self.current_page.title(asLink=True),
+                                 % (self.current_page.title(as_link=True),
                                     error))
 
 
@@ -601,15 +601,15 @@ class CategoryMoveRobot(CategoryPreprocess):
                     "The 'wikibase' option is turned on and {0} has no "
                     'registered username.'.format(repo))
 
-        template_vars = {'oldcat': self.oldcat.title(withNamespace=False)}
+        template_vars = {'oldcat': self.oldcat.title(with_namespace=False)}
         if self.newcat:
             template_vars.update({
                 'newcat': self.newcat.title(
-                    withNamespace=False,
-                    asLink=True,
+                    with_namespace=False,
+                    as_link=True,
                     textlink=True
                 ),
-                'title': self.newcat.title(withNamespace=False)})
+                'title': self.newcat.title(with_namespace=False)})
         # Set edit summary for changed pages.
         if comment:
             self.comment = comment
@@ -731,8 +731,8 @@ class CategoryMoveRobot(CategoryPreprocess):
 
                 page.change_category(self.oldcat, self.newcat,
                                      summary=self.comment,
-                                     inPlace=self.inplace,
-                                     sortKey=self.keep_sortkey)
+                                     in_place=self.inplace,
+                                     sort_key=self.keep_sortkey)
 
                 doc_page = self.determine_template_target(page)
                 if doc_page != page and (not self.title_regex
@@ -740,9 +740,9 @@ class CategoryMoveRobot(CategoryPreprocess):
                                                       doc_page.title())):
                     doc_page.change_category(self.oldcat, self.newcat,
                                              summary=self.comment,
-                                             inPlace=self.inplace,
+                                             in_place=self.inplace,
                                              include=self.includeonly,
-                                             sortKey=self.keep_sortkey)
+                                             sort_key=self.keep_sortkey)
 
     @staticmethod
     def check_move(name, old_page, new_page):
@@ -1018,7 +1018,7 @@ class CategoryTidyRobot(Bot, CategoryPreprocess):
         pywikibot.output(color_format(
             'Treating page {0}, '
             'currently in {lightpurple}{1}{default}',
-            member.title(asLink=True), current_cat.title()))
+            member.title(as_link=True), current_cat.title()))
 
         # Determine a reasonable amount of context to print
         try:
@@ -1158,15 +1158,15 @@ class CategoryTreeRobot(object):
         result = u'#' * currentDepth
         if currentDepth > 0:
             result += u' '
-        result += cat.title(asLink=True, textlink=True, withNamespace=False)
+        result += cat.title(as_link=True, textlink=True, with_namespace=False)
         result += ' (%d)' % cat.categoryinfo['pages']
         if currentDepth < self.maxDepth // 2:
             # noisy dots
             pywikibot.output('.', newline=False)
         # Create a list of other cats which are supercats of the current cat
-        supercat_names = [super_cat.title(asLink=True,
+        supercat_names = [super_cat.title(as_link=True,
                                           textlink=True,
-                                          withNamespace=False)
+                                          with_namespace=False)
                           for super_cat in self.catDB.getSupercats(cat)
                           if super_cat != parent]
 

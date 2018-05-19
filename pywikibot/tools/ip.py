@@ -13,7 +13,7 @@ import sys
 from distutils.version import StrictVersion
 from warnings import warn
 
-from pywikibot.tools import DeprecatedRegex, UnicodeType
+from pywikibot.tools import DeprecatedRegex, deprecated_args, UnicodeType
 
 _ipaddress_e = _ipaddr_e = _ipaddr_version = None
 
@@ -57,9 +57,10 @@ if ip_address and ip_address.__module__ == 'ipaddress':
             orig_ip_address = ip_address
             # force all input to be a unicode object so it validates correctly
 
-            def ip_address_patched(IP):
+            @deprecated_args(IP='ip')
+            def ip_address_patched(ip):
                 """Safe ip_address."""
-                return orig_ip_address(UnicodeType(IP))
+                return orig_ip_address(UnicodeType(ip))
 
             ip_address = ip_address_patched
         except ValueError:
@@ -71,11 +72,12 @@ elif not ip_address:
          'Please install ipaddr 2.1.10+ or ipaddress.'
          % (_ipaddr_e, _ipaddress_e), ImportWarning)
 
-    def ip_address_fake(IP):
+    @deprecated_args(IP='ip')
+    def ip_address_fake(ip):
         """Fake ip_address method."""
         warn('ipaddress backport not available.', DeprecationWarning)
-        if ip_regexp.match(IP) is None:
-            raise ValueError('Invalid IP address')
+        if ip_regexp.match(ip) is None:
+            raise ValueError('Invalid ip address')
 
     ip_address = ip_address_fake
 
@@ -91,18 +93,19 @@ ip_regexp = DeprecatedRegex(
     'page.ip_regexp', 'tools.ip.is_IP')
 
 
-def is_IP(IP):
+@deprecated_args(IP='ip')
+def is_IP(ip):
     """
     Verify the IP address provided is valid.
 
     No logging is performed. Use ip_address instead to catch errors.
 
-    @param IP: IP address
-    @type IP: unicode
+    @param ip: IP address
+    @type ip: unicode
     @rtype: bool
     """
     try:
-        ip_address(IP)
+        ip_address(ip)
         return True
     except ValueError:
         return False

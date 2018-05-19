@@ -19,7 +19,8 @@ import re
 import sys
 
 from pywikibot.textlib import NON_LATIN_DIGITS
-from pywikibot.tools import first_lower, first_upper, deprecated
+from pywikibot.tools import (
+    first_lower, first_upper, deprecated, deprecated_args)
 
 if sys.version_info[0] > 2:
     unicode = str
@@ -286,17 +287,20 @@ _guDigitsToLocal = {ord(unicode(i)): _guDigits[i] for i in range(10)}
 _guLocalToDigits = {ord(_guDigits[i]): unicode(i) for i in range(10)}
 
 
-def intToLocalDigitsStr(value, digitsToLocalDict):
+@deprecated_args(digitsToLocalDict='digits_to_local_dict')
+def intToLocalDigitsStr(value, digits_to_local_dict):
     """Encode an integer value into a textual form."""
-    return unicode(value).translate(digitsToLocalDict)
+    return unicode(value).translate(digits_to_local_dict)
 
 
-def localDigitsStrToInt(value, digitsToLocalDict, localToDigitsDict):
+@deprecated_args(digitsToLocalDict='digits_to_local_dict',
+                 localToDigitsDict='local_to_digits_dict')
+def localDigitsStrToInt(value, digits_to_local_dict, local_to_digits_dict):
     """Convert digits to integer."""
     # First make sure there are no real digits in the string
-    tmp = value.translate(digitsToLocalDict)         # Test
+    tmp = value.translate(digits_to_local_dict)         # Test
     if tmp == value:
-        return int(value.translate(localToDigitsDict))    # Convert
+        return int(value.translate(local_to_digits_dict))    # Convert
     else:
         raise ValueError("string contains regular digits")
 
@@ -1937,7 +1941,8 @@ for monthOfYear in yrMnthFmts:
     formats[monthOfYear] = {}
 
 
-def addFmt1(lang, isMnthOfYear, patterns):
+@deprecated_args(isMnthOfYear='is_month_of_year')
+def addFmt1(lang, is_month_of_year, patterns):
     """Add 12 month formats for a specific type ('January', 'Feb.').
 
     The function must accept one parameter for the ->int or ->string
@@ -1951,7 +1956,7 @@ def addFmt1(lang, isMnthOfYear, patterns):
 
     for i in range(12):
         if patterns[i] is not None:
-            if isMnthOfYear:
+            if is_month_of_year:
                 formats[yrMnthFmts[i]][lang] = eval(
                     u'lambda v: dh_mnthOfYear(v, u"%s")' % patterns[i])
             else:
@@ -1959,10 +1964,12 @@ def addFmt1(lang, isMnthOfYear, patterns):
                     u'lambda v: dh_dayOfMnth(v, u"%s")' % patterns[i])
 
 
-def addFmt2(lang, isMnthOfYear, pattern, makeUpperCase=None):
+@deprecated_args(
+    isMnthOfYear='is_mnth_of_year', makeUpperCase='make_upper_case')
+def addFmt2(lang, is_mnth_of_year, pattern, make_upper_case=None):
     """Update yrMnthFmts and dayMnthFmts using addFmt1."""
-    addFmt1(lang, isMnthOfYear,
-            makeMonthNamedList(lang, pattern, makeUpperCase))
+    addFmt1(lang, is_mnth_of_year,
+            makeMonthNamedList(lang, pattern, make_upper_case))
 
 
 def makeMonthList(pattern):
@@ -1970,7 +1977,8 @@ def makeMonthList(pattern):
     return [pattern % m for m in range(1, 13)]
 
 
-def makeMonthNamedList(lang, pattern, makeUpperCase=None):
+@deprecated_args(makeUpperCase='make_upper_case')
+def makeMonthNamedList(lang, pattern, make_upper_case=None):
     """Create a list of 12 elements based on the name of the month.
 
     The language-dependent month name is used as a formating argument to the
@@ -1979,9 +1987,9 @@ def makeMonthNamedList(lang, pattern, makeUpperCase=None):
     Use %%d for any other parameters that should be preserved.
 
     """
-    if makeUpperCase is None:
+    if make_upper_case is None:
         return [pattern % monthName(lang, m) for m in range(1, 13)]
-    elif makeUpperCase:
+    elif make_upper_case:
         f = first_upper
     else:
         f = first_lower
@@ -2313,7 +2321,8 @@ def getNumberOfDaysInMonth(month):
     return calendar.monthrange(2000, month)[1]
 
 
-def getAutoFormat(lang, title, ignoreFirstLetterCase=True):
+@deprecated_args(ignoreFirstLetterCase='ignore_first_letter_case')
+def getAutoFormat(lang, title, ignore_first_letter_case=True):
     """
     Return first matching formatted date value.
 
@@ -2331,13 +2340,13 @@ def getAutoFormat(lang, title, ignoreFirstLetterCase=True):
     # sometimes the title may begin with an upper case while its listed as
     # lower case, or the other way around
     # change case of the first character to the opposite, and try again
-    if ignoreFirstLetterCase:
+    if ignore_first_letter_case:
         try:
             if title[0].isupper():
                 title = first_lower(title)
             else:
                 title = first_upper(title)
-            return getAutoFormat(lang, title, ignoreFirstLetterCase=False)
+            return getAutoFormat(lang, title, ignore_first_letter_case=False)
         except Exception:
             pass
     return None, None

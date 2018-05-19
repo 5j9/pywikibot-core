@@ -84,10 +84,10 @@ class MovePagesBot(MultipleSitesBot):
             if not msg:
                 msg = i18n.twtranslate(page.site, 'movepages-moving')
             pywikibot.output(u'Moving page %s to [[%s]]'
-                             % (page.title(asLink=True),
+                             % (page.title(as_link=True),
                                 newPageTitle))
             page.move(newPageTitle, reason=msg, movetalkpage=self.getOption('movetalkpage'),
-                      deleteAndMove=self.getOption('noredirect'))
+                      noredirect=self.getOption('noredirect'))
         except pywikibot.PageRelatedError as error:
             pywikibot.output(error)
 
@@ -97,7 +97,7 @@ class MovePagesBot(MultipleSitesBot):
         if self.getOption('skipredirects') and page.isRedirectPage():
             pywikibot.output(u'Page %s is a redirect; skipping.' % page.title())
             return
-        pagetitle = page.title(withNamespace=False)
+        pagetitle = page.title(with_namespace=False)
         namesp = page.site.namespace(page.namespace())
         if self.appendAll:
             newPageTitle = (u'%s%s%s'
@@ -148,7 +148,7 @@ class MovePagesBot(MultipleSitesBot):
                 self.replacePattern = pywikibot.input(
                     u'Enter the replace pattern:')
                 self.regex = re.compile(searchPattern)
-                if page.title() == page.title(withNamespace=False):
+                if page.title() == page.title(with_namespace=False):
                     newPageTitle = self.regex.sub(self.replacePattern,
                                                   page.title())
                 else:
@@ -156,7 +156,8 @@ class MovePagesBot(MultipleSitesBot):
                                           'namespace prefix "%s:"?' % namesp,
                                           automatic_quit=False):
                         newPageTitle = self.regex.sub(
-                            self.replacePattern, page.title(withNamespace=False))
+                            self.replacePattern, page.title(
+                                with_namespace=False))
                         self.noNamespace = True
                     else:
                         newPageTitle = self.regex.sub(self.replacePattern,

@@ -164,11 +164,11 @@ class SandboxBot(Bot):
             now = time.strftime("%d %b %Y %H:%M:%S (UTC)", time.gmtime())
             for sandboxPage in self.generator:
                 pywikibot.output(u'Preparing to process sandbox page %s'
-                                 % sandboxPage.title(asLink=True))
+                                 % sandboxPage.title(as_link=True))
                 if sandboxPage.isRedirectPage():
                     pywikibot.warning(
                         u'%s is a redirect page, cleaning it anyway'
-                        % sandboxPage.title(asLink=True))
+                        % sandboxPage.title(as_link=True))
                 try:
                     text = sandboxPage.text
                     if not self.getOption('text'):

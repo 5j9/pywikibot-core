@@ -19,6 +19,7 @@ except ImportError as e:
 import pywikibot
 
 from pywikibot import config2 as config
+from pywikibot.tools import deprecated_args
 
 # deprecated value
 pydotfound = not isinstance(pydot, ImportError)
@@ -42,11 +43,12 @@ class GraphSavingThread(threading.Thread):
     mechanism to kill a thread if it takes too long.
     """
 
-    def __init__(self, graph, originPage):
+    @deprecated_args(originPage='origin_page')
+    def __init__(self, graph, origin_page):
         """Constructor."""
         threading.Thread.__init__(self)
         self.graph = graph
-        self.originPage = originPage
+        self.originPage = origin_page
 
     def run(self):
         """Write graphs to the data directory."""
@@ -166,7 +168,7 @@ class GraphDrawer(object):
         node = pydot.Node(self.getLabel(page), shape='rectangle')
         node.set_URL("\"http://%s%s\""
                      % (page.site.hostname(),
-                        page.site.get_address(page.title(asUrl=True))))
+                        page.site.get_address(page.title(as_url=True))))
         node.set_style('filled')
         node.set_fillcolor('white')
         node.set_fontsize('11')
@@ -184,11 +186,12 @@ class GraphDrawer(object):
             node.set_shape('octagon')
         self.graph.add_node(node)
 
-    def addDirectedEdge(self, page, refPage):
-        """Add a directed edge from refPage to page."""
+    @deprecated_args(refPage='ref_page')
+    def addDirectedEdge(self, page, ref_page):
+        """Add a directed edge from ref_page to page."""
         # if page was given as a hint, referrers would be [None]
-        if refPage is not None:
-            sourceLabel = self.getLabel(refPage)
+        if ref_page is not None:
+            sourceLabel = self.getLabel(ref_page)
             targetLabel = self.getLabel(page)
             edge = pydot.Edge(sourceLabel, targetLabel)
 
@@ -204,22 +207,22 @@ class GraphDrawer(object):
             elif self.graph.get_edge(sourceLabel, targetLabel):
                 pywikibot.output(
                     u'BUG: Tried to create duplicate edge from %s to %s'
-                    % (refPage.title(asLink=True), page.title(asLink=True)))
+                    % (ref_page.title(as_link=True), page.title(as_link=True)))
                 # duplicate edges would be bad because then get_edge() would
                 # give a list of edges, not a single edge when we handle the
                 # opposite edge.
             else:
                 # add edge
-                if refPage.site == page.site:
+                if ref_page.site == page.site:
                     edge.set_color('blue')
                 elif not page.exists():
                     # mark dead links
                     edge.set_color('red')
-                elif refPage.isDisambig() != page.isDisambig():
+                elif ref_page.isDisambig() != page.isDisambig():
                     # mark links between disambiguation and non-disambiguation
                     # pages
                     edge.set_color('orange')
-                if refPage.namespace() != page.namespace():
+                if ref_page.namespace() != page.namespace():
                     edge.set_color('green')
                 self.graph.add_edge(edge)
 

@@ -505,15 +505,15 @@ class TestSiteGenerators(DefaultSiteTestCase):
 
         # only non-redirects:
         filtered = set(self.site.pagebacklinks(
-            self.mainpage, namespaces=0, filterRedirects=False))
+            self.mainpage, namespaces=0, filter_redirects=False))
         # only redirects:
         redirs = set(self.site.pagebacklinks(
-            self.mainpage, namespaces=0, filterRedirects=True))
+            self.mainpage, namespaces=0, filter_redirects=True))
         # including links to redirect pages (but not the redirects):
         indirect = set(
             self.site.pagebacklinks(self.mainpage, namespaces=[0],
-                                    followRedirects=True,
-                                    filterRedirects=False))
+                                    follow_redirects=True,
+                                    filter_redirects=False))
 
         for bl in backlinks_ns_0:
             self.assertIsInstance(bl, pywikibot.Page)
@@ -532,9 +532,9 @@ class TestSiteGenerators(DefaultSiteTestCase):
         embedded_ns_0_2 = set(self.site.page_embeddedin(
             self.mainpage, namespaces=[0, 2]))
         redirs = set(self.site.page_embeddedin(
-            self.mainpage, filterRedirects=True, namespaces=[0]))
+            self.mainpage, filter_redirects=True, namespaces=[0]))
         no_redirs = set(self.site.page_embeddedin(
-            self.mainpage, filterRedirects=False, namespaces=[0]))
+            self.mainpage, filter_redirects=False, namespaces=[0]))
 
         for ei in embedded_ns_0:
             self.assertIsInstance(ei, pywikibot.Page)
@@ -739,7 +739,7 @@ class TestSiteGenerators(DefaultSiteTestCase):
         for page in mysite.alllinks(start="From", namespace=4, fromids=True,
                                     total=5):
             self.assertIsInstance(page, pywikibot.Page)
-            self.assertGreaterEqual(page.title(withNamespace=False), "From")
+            self.assertGreaterEqual(page.title(with_namespace=False), "From")
             self.assertTrue(hasattr(page, "_fromid"))
         errgen = mysite.alllinks(unique=True, fromids=True)
         self.assertRaises(pywikibot.Error, next, errgen)
@@ -753,14 +753,14 @@ class TestSiteGenerators(DefaultSiteTestCase):
                             for cat in ac))
         for cat in mysite.allcategories(total=5, start="Abc"):
             self.assertIsInstance(cat, pywikibot.Category)
-            self.assertGreaterEqual(cat.title(withNamespace=False), "Abc")
+            self.assertGreaterEqual(cat.title(with_namespace=False), "Abc")
         for cat in mysite.allcategories(total=5, prefix="Def"):
             self.assertIsInstance(cat, pywikibot.Category)
-            self.assertTrue(cat.title(withNamespace=False).startswith("Def"))
+            self.assertTrue(cat.title(with_namespace=False).startswith("Def"))
         # Bug T17985 - reverse and start combined; fixed in v 1.14
         for cat in mysite.allcategories(total=5, start="Hij", reverse=True):
             self.assertIsInstance(cat, pywikibot.Category)
-            self.assertLessEqual(cat.title(withNamespace=False), "Hij")
+            self.assertLessEqual(cat.title(with_namespace=False), "Hij")
 
     def test_botusers(self):
         """Test the site.botusers() method."""
@@ -829,16 +829,16 @@ class TestSiteGenerators(DefaultSiteTestCase):
         for impage in mysite.allimages(start="Ba", total=5):
             self.assertIsInstance(impage, pywikibot.FilePage)
             self.assertTrue(mysite.page_exists(impage))
-            self.assertGreaterEqual(impage.title(withNamespace=False), "Ba")
+            self.assertGreaterEqual(impage.title(with_namespace=False), "Ba")
         # Bug T17985 - reverse and start combined; fixed in v 1.14
         for impage in mysite.allimages(start="Da", reverse=True, total=5):
             self.assertIsInstance(impage, pywikibot.FilePage)
             self.assertTrue(mysite.page_exists(impage))
-            self.assertLessEqual(impage.title(withNamespace=False), "Da")
+            self.assertLessEqual(impage.title(with_namespace=False), "Da")
         for impage in mysite.allimages(prefix="Ch", total=5):
             self.assertIsInstance(impage, pywikibot.FilePage)
             self.assertTrue(mysite.page_exists(impage))
-            self.assertTrue(impage.title(withNamespace=False).startswith("Ch"))
+            self.assertTrue(impage.title(with_namespace=False).startswith("Ch"))
         for impage in mysite.allimages(minsize=100, total=5):
             self.assertIsInstance(impage, pywikibot.FilePage)
             self.assertTrue(mysite.page_exists(impage))
@@ -1453,26 +1453,26 @@ class TestRecentChanges(DefaultSiteTestCase):
     def test_flags(self):
         """Test the site.recentchanges() with boolean flags."""
         mysite = self.site
-        for change in mysite.recentchanges(showMinor=True, total=5):
+        for change in mysite.recentchanges(show_minor=True, total=5):
             self.assertIsInstance(change, dict)
             self.assertIn("minor", change)
-        for change in mysite.recentchanges(showMinor=False, total=5):
+        for change in mysite.recentchanges(show_minor=False, total=5):
             self.assertIsInstance(change, dict)
             self.assertNotIn("minor", change)
-        for change in mysite.recentchanges(showBot=True, total=5):
+        for change in mysite.recentchanges(show_bot=True, total=5):
             self.assertIsInstance(change, dict)
             self.assertIn("bot", change)
-        for change in mysite.recentchanges(showBot=False, total=5):
+        for change in mysite.recentchanges(show_bot=False, total=5):
             self.assertIsInstance(change, dict)
             self.assertNotIn("bot", change)
-        for change in mysite.recentchanges(showAnon=True, total=5):
+        for change in mysite.recentchanges(show_anon=True, total=5):
             self.assertIsInstance(change, dict)
-        for change in mysite.recentchanges(showAnon=False, total=5):
+        for change in mysite.recentchanges(show_anon=False, total=5):
             self.assertIsInstance(change, dict)
-        for change in mysite.recentchanges(showRedirects=True, total=5):
+        for change in mysite.recentchanges(show_redirects=True, total=5):
             self.assertIsInstance(change, dict)
             self.assertIn("redirect", change)
-        for change in mysite.recentchanges(showRedirects=False, total=5):
+        for change in mysite.recentchanges(show_redirects=False, total=5):
             self.assertIsInstance(change, dict)
             self.assertNotIn("redirect", change)
 
@@ -1496,11 +1496,11 @@ class TestUserRecentChanges(DefaultSiteTestCase):
     def test_patrolled(self):
         """Test the site.recentchanges() with patrolled boolean flags."""
         mysite = self.site
-        for change in mysite.recentchanges(showPatrolled=True, total=5):
+        for change in mysite.recentchanges(show_patrolled=True, total=5):
             self.assertIsInstance(change, dict)
             if mysite.has_right('patrol'):
                 self.assertIn("patrolled", change)
-        for change in mysite.recentchanges(showPatrolled=False, total=5):
+        for change in mysite.recentchanges(show_patrolled=False, total=5):
             self.assertIsInstance(change, dict)
             if mysite.has_right('patrol'):
                 self.assertNotIn("patrolled", change)
@@ -1583,7 +1583,7 @@ class SearchTestCase(DefaultSiteTestCase):
                 if 'wiki' not in hit.title().lower():
                     self.assertTrue(
                         any('wiki' in r.title().lower()
-                            for r in hit.getReferences(redirectsOnly=True)),
+                            for r in hit.getReferences(redirects_only=True)),
                         "'wiki' neither found in '{0}'.lower() "
                         'nor in its redirects'.format(hit.title()))
         except pywikibot.data.api.APIError as e:
@@ -1629,12 +1629,12 @@ class TestUserContribsAsUser(DefaultSiteTestCase):
         """Test the site.usercontribs() method using showMinor."""
         mysite = self.get_site()
         for contrib in mysite.usercontribs(user=mysite.user(),
-                                           showMinor=True, total=5):
+                                           show_minor=True, total=5):
             self.assertIsInstance(contrib, dict)
             self.assertIn("minor", contrib)
 
         for contrib in mysite.usercontribs(user=mysite.user(),
-                                           showMinor=False, total=5):
+                                           show_minor=False, total=5):
             self.assertIsInstance(contrib, dict)
             self.assertNotIn("minor", contrib)
 
@@ -1778,21 +1778,21 @@ class SiteWatchlistRevsTestCase(DefaultSiteTestCase):
             prefix = title[:title.index(":")]
             self.assertIn(self.site.namespaces.lookup_name(prefix).id, [6, 7])
             self.assertIn(rev["ns"], [6, 7])
-        for rev in mysite.watchlist_revs(showMinor=True, total=5):
+        for rev in mysite.watchlist_revs(show_minor=True, total=5):
             self.assertIsInstance(rev, dict)
             self.assertIn("minor", rev)
-        for rev in mysite.watchlist_revs(showMinor=False, total=5):
+        for rev in mysite.watchlist_revs(show_minor=False, total=5):
             self.assertIsInstance(rev, dict)
             self.assertNotIn("minor", rev)
-        for rev in mysite.watchlist_revs(showBot=True, total=5):
+        for rev in mysite.watchlist_revs(show_bot=True, total=5):
             self.assertIsInstance(rev, dict)
             self.assertIn("bot", rev)
-        for rev in mysite.watchlist_revs(showBot=False, total=5):
+        for rev in mysite.watchlist_revs(show_bot=False, total=5):
             self.assertIsInstance(rev, dict)
             self.assertNotIn("bot", rev)
-        for rev in mysite.watchlist_revs(showAnon=True, total=5):
+        for rev in mysite.watchlist_revs(show_anon=True, total=5):
             self.assertIsInstance(rev, dict)
-        for rev in mysite.watchlist_revs(showAnon=False, total=5):
+        for rev in mysite.watchlist_revs(show_anon=False, total=5):
             self.assertIsInstance(rev, dict)
 
 

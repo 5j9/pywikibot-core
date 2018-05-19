@@ -1042,9 +1042,9 @@ class Family(object):
             cr_page = pywikibot.Page(site, cr_template, ns=tpl_ns)
             # retrieve all redirects to primary template from API,
             # add any that are not already on the list
-            for t in cr_page.backlinks(filterRedirects=True,
+            for t in cr_page.backlinks(filter_redirects=True,
                                        namespaces=tpl_ns):
-                newtitle = t.title(withNamespace=False)
+                newtitle = t.title(with_namespace=False)
                 if newtitle not in cr_template_tuple:
                     cr_set.add(newtitle)
         self._catredirtemplates[code] = list(cr_template_tuple) + list(cr_set)
@@ -1407,23 +1407,25 @@ class Family(object):
         """Check the wiki require logging in before viewing it."""
         return True
 
-    def post_get_convert(self, site, getText):
+    @deprecated_args(getText='get_text')
+    def post_get_convert(self, site, get_text):
         """
         Do a conversion on the retrieved text from the Wiki.
 
         For example a X-conversion in Esperanto
         U{https://en.wikipedia.org/wiki/Esperanto_orthography#X-system}.
         """
-        return getText
+        return get_text
 
-    def pre_put_convert(self, site, putText):
+    @deprecated_args(putText='put_text')
+    def pre_put_convert(self, site, put_text):
         """
         Do a conversion on the text to insert on the Wiki.
 
         For example a X-conversion in Esperanto
         U{https://en.wikipedia.org/wiki/Esperanto_orthography#X-system}.
         """
-        return putText
+        return put_text
 
     @property
     def obsolete(self):

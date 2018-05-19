@@ -42,11 +42,15 @@ class UploadRobot(BaseBot):
 
     """Upload bot."""
 
-    @deprecated_args(uploadByUrl=None)
-    def __init__(self, url, urlEncoding=None, description=u'',
-                 useFilename=None, keepFilename=False,
-                 verifyDescription=True, ignoreWarning=False,
-                 targetSite=None, aborts=[], chunk_size=0,
+    @deprecated_args(
+        uploadByUrl=None, urlEncoding='url_encoding',
+        useFilename='use_filename', keepFilename='keep_filename',
+        verifyDescription='verify_description', ignoreWarning='ignore_warning',
+        targetSite='target_site')
+    def __init__(self, url, url_encoding=None, description=u'',
+                 use_filename=None, keep_filename=False,
+                 verify_description=True, ignore_warning=False,
+                 target_site=None, aborts=[], chunk_size=0,
                  summary=None, **kwargs):
         """
         Constructor.
@@ -57,24 +61,24 @@ class UploadRobot(BaseBot):
         @param description: Description of file for its page. If multiple files
             are uploading the same description is used for every file.
         @type description: string
-        @param useFilename: Specify title of the file's page. If multiple
+        @param use_filename: Specify title of the file's page. If multiple
             files are uploading it asks to change the name for second, third,
             etc. files, otherwise the last file will overwrite the other.
-        @type useFilename: string
-        @param keepFilename: Set to True to keep original names of urls and
+        @type use_filename: string
+        @param keep_filename: Set to True to keep original names of urls and
             files, otherwise it will ask to enter a name for each file.
-        @type keepFilename: bool
+        @type keep_filename: bool
         @param summary: Summary of the upload
         @type summary: string
-        @param verifyDescription: Set to True to proofread the description.
-        @type verifyDescription: bool
-        @param ignoreWarning: Set this to True to upload even if another file
+        @param verify_description: Set to True to proofread the description.
+        @type verify_description: bool
+        @param ignore_warning: Set this to True to upload even if another file
             would be overwritten or another mistake would be risked. Set it to
             an array of warning codes to selectively ignore specific warnings.
-        @type ignoreWarning: bool or list
-        @param targetSite: Set the site to upload to. If target site is not
+        @type ignore_warning: bool or list
+        @param target_site: Set the site to upload to. If target site is not
             given it's taken from user-config.py.
-        @type targetSite: object
+        @type target_site: object
         @param aborts: List of the warning types to abort upload on. Set to
             True to abort on any warning.
         @type aborts: bool or list
@@ -93,9 +97,9 @@ class UploadRobot(BaseBot):
         """
         super(UploadRobot, self).__init__(**kwargs)
         always = self.getOption('always')
-        if (always and ignoreWarning is not True and aborts is not True):
+        if always and ignore_warning is not True and aborts is not True:
             raise ValueError('When always is set to True, either '
-                             'ignoreWarning or aborts must be set to True.')
+                             'ignore_warning or aborts must be set to True.')
         if always and not description:
             raise ValueError('When always is set to True, the description '
                              'must be set.')
@@ -103,20 +107,20 @@ class UploadRobot(BaseBot):
         if isinstance(self.url, basestring):
             pywikibot.warning("url as string is deprecated. "
                               "Use an iterable instead.")
-        self.urlEncoding = urlEncoding
+        self.urlEncoding = url_encoding
         self.description = description
-        self.useFilename = useFilename
-        self.keepFilename = keepFilename or always
-        self.verifyDescription = verifyDescription and not always
-        self.ignoreWarning = ignoreWarning
+        self.useFilename = use_filename
+        self.keepFilename = keep_filename or always
+        self.verifyDescription = verify_description and not always
+        self.ignoreWarning = ignore_warning
         self.aborts = aborts
         self.chunk_size = chunk_size
         self.summary = summary
         if config.upload_to_commons:
-            self.targetSite = targetSite or pywikibot.Site('commons',
-                                                           'commons')
+            self.targetSite = target_site or pywikibot.Site('commons',
+                                                            'commons')
         else:
-            self.targetSite = targetSite or pywikibot.Site()
+            self.targetSite = target_site or pywikibot.Site()
         self.targetSite.login()
 
     @deprecated()
@@ -542,7 +546,7 @@ class BaseUnlinkBot(ExistingPageBot, NoRedirectPageBot, AutomaticTWSummaryBot):
             except EditReplacement:
                 new_text = TextEditor().edit(
                     unlink_callback.current_text,
-                    jumpIndex=unlink_callback.current_range[0])
+                    jump_index=unlink_callback.current_range[0])
                 # if user didn't press Cancel
                 if new_text:
                     text = new_text

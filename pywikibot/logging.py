@@ -109,7 +109,7 @@ def logoutput(text, decoder=None, newline=True, _level=INFO, _logger="",
     logger.log(_level, text, extra=context, **kwargs)
 
 
-def output(text, decoder=None, newline=True, toStdout=False, **kwargs):
+def output(text, decoder=None, newline=True, **kwargs):
     r"""Output a message to the user via the userinterface.
 
     Works like print, but uses the encoding used by the user's console
@@ -134,7 +134,7 @@ def output(text, decoder=None, newline=True, toStdout=False, **kwargs):
     only argument that is useful is "exc_info=True", which causes the
     log message to include an exception traceback.
     """
-    if toStdout:  # maintained for backwards-compatibity only
+    if 'toStdout' in kwargs:  # maintained for backwards-compatibity only
         from pywikibot.tools import issue_deprecation_warning  # noqa
         issue_deprecation_warning('"toStdout" parameter',
                                   'pywikibot.stdout()', 2)

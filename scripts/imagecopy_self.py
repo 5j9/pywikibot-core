@@ -405,7 +405,7 @@ class imageFetcher(threading.Thread):
         licensetemplate = self.getNewLicensetemplate(imagepage)
         categories = self.getNewCategories(imagepage)
         return {u'imagepage': imagepage,
-                u'filename': imagepage.title(withNamespace=False),
+                u'filename': imagepage.title(with_namespace=False),
                 u'description': description,
                 u'date': date,
                 u'source': source,
@@ -895,10 +895,10 @@ class uploader(threading.Thread):
         pywikibot.output(cid)
         bot = UploadRobot(url=fields.get('imagepage').fileUrl(),
                           description=cid,
-                          useFilename=fields.get('filename'),
-                          keepFilename=True, verifyDescription=False,
-                          ignoreWarning=True,
-                          targetSite=pywikibot.Site('commons', 'commons'))
+                          use_filename=fields.get('filename'),
+                          keep_filename=True, verify_description=False,
+                          ignore_warning=True,
+                          target_site=pywikibot.Site('commons', 'commons'))
         bot.run()
 
         self.tagNowcommons(fields.get('imagepage'), fields.get('filename'))
@@ -1001,7 +1001,7 @@ class uploader(threading.Thread):
 
             commentText = i18n.twtranslate(
                 imagepage.site(), 'commons-file-now-available',
-                {'localfile': imagepage.title(withNamespace=False),
+                {'localfile': imagepage.title(with_namespace=False),
                  'commonsfile': filename})
 
             pywikibot.showDiff(imagepage.get(), imtxt + addTemplate)
@@ -1009,18 +1009,18 @@ class uploader(threading.Thread):
 
     def replaceUsage(self, imagepage, filename):
         """Replace all usage if image is uploaded under a different name."""
-        if imagepage.title(withNamespace=False) != filename:
+        if imagepage.title(with_namespace=False) != filename:
             gen = pagegenerators.FileLinksGenerator(imagepage)
             preloadingGen = pagegenerators.PreloadingGenerator(gen)
 
             moveSummary = i18n.twtranslate(
                 imagepage.site(), 'commons-file-moved',
-                {'localfile': imagepage.title(withNamespace=False),
+                {'localfile': imagepage.title(with_namespace=False),
                  'commonsfile': filename})
 
             imagebot = image.ImageRobot(
                 generator=preloadingGen,
-                oldImage=imagepage.title(withNamespace=False),
+                oldImage=imagepage.title(with_namespace=False),
                 newImage=filename, summary=moveSummary,
                 always=True, loose=True)
             imagebot.run()

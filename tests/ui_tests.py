@@ -280,13 +280,13 @@ class TestTerminalOutput(UITestCase):
         self.assertEqual(newstderr.getvalue(), 'CRITICAL: CRITICAL\n')
 
     def test_output(self):
-        pywikibot.output('output', toStdout=False)
+        pywikibot.output('output', to_stdout=False)
         self.assertEqual(newstdout.getvalue(), '')
         self.assertEqual(newstderr.getvalue(), 'output\n')
 
     def test_output_stdout(self):
         with warnings.catch_warnings(record=True) as w:
-            pywikibot.output('output', toStdout=True)
+            pywikibot.output('output', to_stdout=True)
             self.assertEqual(newstdout.getvalue(), 'output\n')
             self.assertEqual(len(w), 1)
             self.assertEqual(w[0].category, DeprecationWarning)

@@ -33,6 +33,9 @@ from ctypes import Structure, byref, c_int, create_unicode_buffer, sizeof
 from ctypes import c_void_p as LPVOID
 from io import IOBase, UnsupportedOperation
 
+from pywikibot.tools import deprecated_args
+
+
 OSWIN32 = (sys.platform == "win32")
 
 if sys.version_info[0] > 2:
@@ -66,9 +69,10 @@ class UnicodeInput(IOBase):
 
     """Unicode terminal input class."""
 
-    def __init__(self, hConsole, name, bufsize=1024):
+    @deprecated_args(hConsole='h_console')
+    def __init__(self, h_console, name, bufsize=1024):
         """Initialize the input stream."""
-        self._hConsole = hConsole
+        self._hConsole = h_console
         self.bufsize = bufsize
         self.buffer = create_unicode_buffer(bufsize)
         self.name = name
@@ -92,9 +96,10 @@ class UnicodeOutput(IOBase):
 
     """Unicode terminal output class."""
 
-    def __init__(self, hConsole, stream, fileno, name):
+    @deprecated_args(hConsole='h_console')
+    def __init__(self, h_console, stream, fileno, name):
         """Initialize the output stream."""
-        self._hConsole = hConsole
+        self._hConsole = h_console
         self._stream = stream
         self._fileno = fileno
         self.softspace = False

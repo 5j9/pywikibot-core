@@ -20,7 +20,7 @@ from pywikibot.bot import VERBOSE, INFO, STDOUT, INPUT, WARNING
 from pywikibot.bot_choice import (
     Option, OutputOption, StandardOption, ChoiceException, QuitKeyboardInterrupt,
 )
-from pywikibot.tools import deprecated, PY2
+from pywikibot.tools import deprecated, deprecated_args, PY2
 from pywikibot.userinterfaces import transliteration
 
 transliterator = transliteration.transliterator(config.console_encoding)
@@ -183,7 +183,8 @@ class UI(object):
                 # set the new color, but only if they change
                 self.encounter_color(color_stack[-1], target_stream)
 
-    def output(self, text, toStdout=False, targetStream=None):
+    @deprecated_args(toStdout='to_stdout', targetStream='target_stream')
+    def output(self, text, to_stdout=False, target_stream=None):
         """
         Output text to a stream.
 
@@ -232,13 +233,13 @@ class UI(object):
                     prev = codecedText[i]
             text = transliteratedText
 
-        if not targetStream:
-            if toStdout:
-                targetStream = self.stdout
+        if not target_stream:
+            if to_stdout:
+                target_stream = self.stdout
             else:
-                targetStream = self.stderr
+                target_stream = self.stderr
 
-        self._print(text, targetStream)
+        self._print(text, target_stream)
 
     def _raw_input(self):
         if not PY2:
@@ -431,15 +432,16 @@ class UI(object):
             else:
                 pywikibot.error("Invalid response")
 
-    def editText(self, text, jumpIndex=None, highlight=None):
+    @deprecated_args(jumpIndex='jump_index')
+    def editText(self, text, jump_index=None, highlight=None):
         """Return the text as edited by the user.
 
         Uses a Tkinter edit box because we don't have a console editor
 
         @param text: the text to be edited
         @type text: unicode
-        @param jumpIndex: position at which to put the caret
-        @type jumpIndex: int
+        @param jump_index: position at which to put the caret
+        @type jump_index: int
         @param highlight: each occurrence of this substring will be highlighted
         @type highlight: unicode
         @return: the modified text, or None if the user didn't save the text
@@ -452,7 +454,7 @@ class UI(object):
             pywikibot.warning('Could not load GUI modules: {0}'.format(e))
             return text
         editor = gui.EditBoxWindow()
-        return editor.edit(text, jumpIndex=jumpIndex, highlight=highlight)
+        return editor.edit(text, jump_index=jump_index, highlight=highlight)
 
     def argvu(self):
         """Return the decoded arguments from argv."""
@@ -477,7 +479,8 @@ class TerminalHandler(logging.Handler):
     # create a class-level lock that can be shared by all instances
     sharedlock = threading.RLock()
 
-    def __init__(self, UI, strm=None):
+    @deprecated_args(UI='ui')
+    def __init__(self, ui, strm=None):
         """Initialize the handler.
 
         If strm is not specified, sys.stderr is used.
@@ -492,7 +495,7 @@ class TerminalHandler(logging.Handler):
             strm = sys.stderr
         self.stream = strm
         self.formatter = None
-        self.UI = UI
+        self.UI = ui
 
     def flush(self):
         """Flush the stream."""
@@ -510,7 +513,7 @@ class TerminalHandler(logging.Handler):
                 record.__dict__['newline'] = '\n'
 
         text = self.format(record)
-        return self.UI.output(text, targetStream=self.stream)
+        return self.UI.output(text, target_stream=self.stream)
 
 
 class TerminalFormatter(logging.Formatter):

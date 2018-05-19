@@ -194,10 +194,10 @@ def main(*args):
     else:
         url = [url]
 
-    bot = UploadRobot(url, description=description, useFilename=useFilename,
-                      keepFilename=keepFilename,
-                      verifyDescription=verifyDescription,
-                      aborts=aborts, ignoreWarning=ignorewarn,
+    bot = UploadRobot(url, description=description, use_filename=useFilename,
+                      keep_filename=keepFilename,
+                      verify_description=verifyDescription,
+                      aborts=aborts, ignore_warning=ignorewarn,
                       chunk_size=chunk_size, always=always,
                       summary=summary)
     bot.run()

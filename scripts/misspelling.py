@@ -100,7 +100,7 @@ class MisspellingRobot(DisambiguationRobot):
             generators = (
                 pagegenerators.ReferringPageGenerator(
                     pywikibot.Page(self.site, misspellingTemplateName, ns=10),
-                    onlyTemplateInclusion=True)
+                    only_template_inclusion=True)
                 for misspellingTemplateName in templates)
             if firstPageTitle:
                 pywikibot.output(
@@ -132,7 +132,7 @@ class MisspellingRobot(DisambiguationRobot):
             if isinstance(templates, basestring):
                 templates = (templates, )
             for template, params in disambPage.templatesWithParams():
-                if template.title(withNamespace=False) in templates:
+                if template.title(with_namespace=False) in templates:
                     # The correct spelling is in the last parameter.
                     correctSpelling = params[-1]
                     # On de.wikipedia, there are some cases where the

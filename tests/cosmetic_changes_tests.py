@@ -24,7 +24,7 @@ class TestCosmeticChanges(TestCase):
         """Setup class for all tests."""
         super(TestCosmeticChanges, cls).setUpClass()
         cls.cct = CosmeticChangesToolkit(cls.site, namespace=0,
-                                         pageTitle='Test')
+                                         page_title='Test')
 
 
 class TestDryCosmeticChanges(TestCosmeticChanges):

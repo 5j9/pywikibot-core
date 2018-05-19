@@ -226,8 +226,8 @@ class CosmeticChangesToolkit(object):
 
     """Cosmetic changes toolkit."""
 
-    @deprecated_args(debug='diff', redirect=None)
-    def __init__(self, site, diff=False, namespace=None, pageTitle=None,
+    @deprecated_args(debug='diff', redirect=None, pageTitle='page_title')
+    def __init__(self, site, diff=False, namespace=None, page_title=None,
                  ignore=CANCEL_ALL):
         """Constructor."""
         self.site = site
@@ -239,7 +239,7 @@ class CosmeticChangesToolkit(object):
                              .format(self.__class__.__name__))
         self.template = (self.namespace == 10)
         self.talkpage = self.namespace >= 0 and self.namespace % 2 == 1
-        self.title = pageTitle
+        self.title = page_title
         self.ignore = ignore
 
         self.common_methods = (
