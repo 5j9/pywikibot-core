@@ -25,7 +25,7 @@ from pywikibot.pagegenerators import (
 
 from pywikibot.tools import has_module, suppress_warnings
 
-from tests import join_data_path
+from tests import join_data_path, mock
 from tests.aspects import (
     unittest,
     TestCase,
@@ -1299,12 +1299,16 @@ class TestLogeventsFactoryGenerator(DefaultSiteTestCase,
 
     def test_logevents_parse(self):
         """Test wrong logevents option."""
-        gf = pagegenerators.GeneratorFactory()
+        factory = pagegenerators.GeneratorFactory
+        gf = factory()
         self.assertFalse(gf.handleArg("-log"))
         self.assertFalse(gf.handleArg("-log:text_here"))
         self.assertRaises(NotImplementedError,
                           gf.handleArg, '-logevents:anyevent')
-        self.assertRaises(NotImplementedError, gf.handleArg, '-anotherlog')
+        # test that old format log option is not handled by any handler method.
+        gf_mock = mock.create_autospec(gf)
+        self.assertFalse(factory.handleArg(gf_mock, '-anotherlog'))
+        self.assertFalse(gf_mock.method_calls)
 
     def test_logevents_default(self):
         """Test old logevents option handling."""
