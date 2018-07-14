@@ -828,6 +828,44 @@ def replace_links(text, replace, site=None):
 # -------------------------------
 # Functions dealing with sections
 # -------------------------------
+def _heading_span_pairs(text, site):
+    """Return valid headings and their spans."""
+    headings = []
+    heading_regex = _get_regexes(['header'], site)[0]
+    pos = 0
+    while True:
+        match = heading_regex.search(text[pos:])
+        if not match:
+            break
+        start = pos + match.start()
+        end = pos + match.end()
+        if not (isDisabled(text, start)
+                or isDisabled(text, end)):
+            headings.append((match.group(), start, end))
+        pos = end
+    return headings
+
+
+def _heading_content_pairs(text, headings):
+    """Return a list of (section_heading, section_content) tuples."""
+    contents = []
+    body = []
+    if headings:
+        # Assign them their contents
+        for i, current in enumerate(headings):
+            try:
+                following = headings[i + 1]
+            except IndexError:
+                following = None
+            if following:
+                contents.append(text[current[2]:following[1]])
+            else:
+                contents.append(text[current[2]:])
+        body = [(heading[0], section)
+                for heading, section in zip(headings, contents)]
+    return body
+
+
 def extract_sections(text, site=None):
     """
     Return section headings and contents found in text.
@@ -859,63 +897,18 @@ def extract_sections(text, site=None):
 
     @rtype: tuple of (str, list of tuples, str)
     """
-    headings = []
-    contents = []
-    body = []
-
-    # Find valid headings
-    heading_regex = _get_regexes(['header'], site)[0]
-    pos = 0
-    while True:
-        match = heading_regex.search(text[pos:])
-        if not match:
-            break
-        start = pos + match.start()
-        end = pos + match.end()
-        if not (isDisabled(text, start)
-                or isDisabled(text, end)):
-            headings += [(match.group(), start, end)]
-        pos = end
-
-    if headings:
-        # Assign them their contents
-        for i, current in enumerate(headings):
-            try:
-                following = headings[i + 1]
-            except IndexError:
-                following = None
-            if following:
-                contents.append(text[current[2]:following[1]])
-            else:
-                contents.append(text[current[2]:])
-        body = [(heading[0], section)
-                for heading, section in zip(headings, contents)]
-
+    heading_span_pairs = _heading_span_pairs(text, site)
+    heading_content_pairs = _heading_content_pairs(text, heading_span_pairs)
     # Find header and footer contents
-    header = text[:headings[0][1]] if headings else text
-
-    last_section = body[-1][1] if body else header
-    skippings = ['category', 'interwiki']
-    footer_regexes = _get_regexes(skippings, site)
-    # we want only interwikis, not interlanguage links
-    footer_regexes[1] = re.compile(
-        footer_regexes[1].pattern.replace(':?', ''))
-    # find where to cut
-    positions = []
-    for reg in footer_regexes:
-        match = reg.search(last_section)
-        if match:
-            positions.append(match.start())
-    pos = min(pos for pos in positions) if positions else len(last_section)
-
-    # Strip footer from last section content
-    last_section, footer = last_section[:pos], last_section[pos:]
-    if body:
-        body[-1] = (body[-1][0], last_section)
-    else:
-        header = last_section
-
-    return header, body, footer
+    header = text[:heading_span_pairs[0][1]] if heading_span_pairs else text
+    last_section = \
+        heading_content_pairs[-1][1] if heading_content_pairs else header
+    cat_regex, interwiki_regex = _get_regexes(('category', 'interwiki'), site)
+    langlink_pattern = interwiki_regex.pattern.replace(':?', '')
+    footer = re.search(
+        r'(%s)*\Z' % r'|'.join((langlink_pattern, cat_regex.pattern, r'\s+')),
+        last_section).group().strip()
+    return header, heading_content_pairs, footer
 
 
 # -----------------------------------------------
@@ -2006,7 +1999,7 @@ def does_text_contain_section(pagetext, section):
     It does not care whether a section string may contain spaces or
     underlines. Both will match.
 
-    If a section parameter contains a internal link, it will match the
+    If a section parameter contains an internal link, it will match the
     section with or without a preceding colon which is required for a
     text link e.g. for categories and files.
 
