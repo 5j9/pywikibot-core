@@ -4,6 +4,7 @@ Release history
 Current release
 ---------------
 
+* All PYWIKIBOT2_* environment variables are now deprecated, use PYWIKIBOT_* instead.
 * Bugfixes and improvements
 * Localisation updates
 
