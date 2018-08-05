@@ -3291,6 +3291,8 @@ def _update_revisions(page, revisions):
     """Update page revisions."""
     # TODO: T102735: Use the page content model for <1.21
     for rev in revisions:
+        # page.site.version() >= MediaWikiVersion('1.32')
+        rev.update(rev.get('slots', {}).get('main', {}))
         revision = pywikibot.page.Revision(
             revid=rev['revid'],
             timestamp=pywikibot.Timestamp.fromISOformat(rev['timestamp']),
