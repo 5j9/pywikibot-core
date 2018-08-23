@@ -332,6 +332,10 @@ class TestLiveCosmeticChanges(TestCosmeticChanges):
             self.cct.removeEmptySections('\n==Bar==\n[[cs:Foo]]'
                                          '\n[[Category:Baz]]'))
 
+    def test_remove_empty_sections_no_change(self):
+        text = 'text [[:en:link]]\n=== title1 ===\ncontent1'
+        self.assertEqual(text, self.cct.removeEmptySections(text))
+
     def test_remove_empty_sections_with_heading_comments(self):
         """Test removeEmptySections with comments in the section headings."""
         self.assertEqual(
