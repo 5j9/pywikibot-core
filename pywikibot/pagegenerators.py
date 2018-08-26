@@ -1479,7 +1479,7 @@ def CategorizedPageGenerator(category, recurse=False, start=None,
         'content': content, 'namespaces': namespaces,
     }
     if start:
-        if category.site.version() < MediaWikiVersion('1.18'):
+        if category.site.mwversion() < '1.18':
             kwargs.pop('total', None)
             count = 0
             for article in category.articles(**kwargs):

@@ -82,7 +82,7 @@ class MediaWikiKnownTypesTestCase(KnownTypesTestBase,
     def test_watchlist_show_flags(self):
         """Test watchlist show flags."""
         types = ['minor', 'bot', 'anon', 'patrolled']
-        if MediaWikiVersion(self.site.version()) >= MediaWikiVersion('1.24'):
+        if self.site.mwversion() >= '1.24':
             types.append('unread')
 
         known = types + ['!%s' % item for item in types]
@@ -93,12 +93,12 @@ class MediaWikiKnownTypesTestCase(KnownTypesTestBase,
         """Test watchlist type."""
         known = ['edit', 'new', 'log']
 
-        _version = MediaWikiVersion(self.site.version())
+        mwversion = self.site.mwversion()
 
-        if _version >= MediaWikiVersion('1.20'):
+        if mwversion >= '1.20':
             known.append('external')
-        if _version.version >= (1, 27):
-            if _version >= MediaWikiVersion('1.27.0-wmf.4') or _version.suffix == 'alpha':
+        if mwversion.version >= (1, 27):
+            if mwversion >= '1.27.0-wmf.4' or mwversion.suffix == 'alpha':
                 known.append('categorize')
 
         self._check_param_values(self.site, 'query+watchlist', 'type', known)
@@ -125,7 +125,7 @@ class MediaWikiKnownTypesTestCase(KnownTypesTestBase,
             'text/css',
             'text/plain',
         ]
-        if MediaWikiVersion(self.site.version()) >= MediaWikiVersion('1.24'):
+        if self.site.mwversion() >= '1.24':
             base.append('application/json')
         if isinstance(self.site, DataSite):
             # It is not clear when this format has been added, see T129281.
@@ -151,7 +151,7 @@ class MediaWikiKnownTypesTestCase(KnownTypesTestBase,
             'Scribunto',
             'JsonSchema',
         ]
-        if MediaWikiVersion(self.site.version()) >= MediaWikiVersion('1.24'):
+        if self.site.mwversion() >= '1.24':
             base.append('json')
 
         self._check_param_subset(self.site, 'edit', 'contentmodel', base)

@@ -740,8 +740,7 @@ class WbQuantity(_WbRepresentation):
                 "WbQuantity now expects a 'site' parameter. This is needed to "
                 "ensure correct handling of error bounds.")
             return False
-        return MediaWikiVersion(
-            site.version()) < MediaWikiVersion('1.29.0-wmf.2')
+        return site.mwversion() < '1.29.0-wmf.2'
 
     @staticmethod
     def _todecimal(value):

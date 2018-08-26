@@ -2488,7 +2488,7 @@ class APISite(BaseSite):
             raise NotImplementedError(
                 'MediaWiki messages missing: {0}'.format(needed_mw_messages))
 
-        if MediaWikiVersion(self.version()) < MediaWikiVersion('1.16'):
+        if self.mwversion() < '1.16':
             for key, value in msgs.items():
                 if key == 'and' and value == ',&#32;and':
                     # v1.14 defined and as ',&#32;and'; fixed in v1.15
@@ -2527,7 +2527,7 @@ class APISite(BaseSite):
             req['title'] = title
         if includecomments is True:
             req['includecomments'] = u''
-        if MediaWikiVersion(self.version()) > MediaWikiVersion("1.24wmf7"):
+        if self.mwversion() > '1.24wmf7':
             key = 'wikitext'
             req['prop'] = key
         else:
@@ -2563,7 +2563,7 @@ class APISite(BaseSite):
         @return: the current server time
         @rtype: L{Timestamp}
         """
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion("1.16"):
+        if self.mwversion() >= '1.16':
             return pywikibot.Timestamp.fromISOformat(
                 self.siteinfo.get('time', expiry=0))
         else:
@@ -2634,7 +2634,7 @@ class APISite(BaseSite):
         # and Image became File with Image as an alias.
         # For versions lower than 1.14, APISite needs to override
         # the defaults defined in Namespace.
-        is_mw114 = MediaWikiVersion(self.version()) >= MediaWikiVersion('1.14')
+        is_mw114 = self.mwversion() >= '1.14'
 
         for nsdata in self.siteinfo.get('namespaces', cache=False).values():
             ns = nsdata.pop('id')
@@ -2755,6 +2755,20 @@ class APISite(BaseSite):
                                     'you are not logged in')
                 version = self.family.version(self.code)
         return version
+
+    def mwversion(self):
+        """Return self.version() as a MediaWikiVersion object.
+
+        Cache the result for 24 hours.
+        """
+        cache_version, cache_time = getattr(
+            self, '_mwversion_time', (None, None))
+        current_time = time.time()
+        if cache_version is None or (cache_time - current_time) > 60 * 60 * 24:
+            mwversion = MediaWikiVersion(self.version())
+            self._mwversion_time = mwversion, current_time
+            return mwversion
+        return cache_version
 
     @property
     def has_image_repository(self):
@@ -3374,7 +3388,7 @@ class APISite(BaseSite):
             else:
                 rvgen.request['titles'] = list(cache.keys())
             rvgen.request['rvprop'] = rvprop
-            if self.version() >= MediaWikiVersion('1.32'):
+            if self.mwversion() >= '1.32':
                 rvgen.request['rvslots'] = '*'
             pywikibot.output(u"Retrieving %s pages from %s."
                              % (len(cache), self))
@@ -3426,19 +3440,19 @@ class APISite(BaseSite):
 
         Valid tokens depend on mw version.
         """
-        _version = MediaWikiVersion(self.version())
-        if _version < MediaWikiVersion('1.20'):
+        mwversion = self.mwversion()
+        if mwversion < '1.20':
             types_wiki = self._paraminfo.parameter('query+info',
                                                    'token')['type']
             types_wiki.append('patrol')
             valid_types = [token for token in types if token in types_wiki]
 
             # Pre 1.17, preload token was the same as the edit token.
-            if _version < MediaWikiVersion('1.17'):
+            if mwversion < '1.17':
                 if 'patrol' in types and 'edit' not in valid_types:
                     valid_types.append('edit')
 
-        elif _version < MediaWikiVersion('1.24wmf19'):
+        elif mwversion < '1.24wmf19':
             types_wiki = self._paraminfo.parameter('tokens',
                                                    'type')['type']
             valid_types = [token for token in types if token in types_wiki]
@@ -3496,8 +3510,8 @@ class APISite(BaseSite):
                 r'Action \'\w+\' is not allowed for the current user', text)
 
         user_tokens = {}
-        _version = MediaWikiVersion(self.version())
-        if _version < MediaWikiVersion('1.20'):
+        mwversion = self.mwversion()
+        if mwversion < '1.20':
             if all:
                 types_wiki = self._paraminfo.parameter('query+info',
                                                        'token')['type']
@@ -3521,8 +3535,7 @@ class APISite(BaseSite):
             # patrol token require special handling.
             # TODO: try to catch exceptions?
             if 'patrol' in valid_tokens:
-                if MediaWikiVersion(
-                        '1.14') <= _version < MediaWikiVersion('1.17'):
+                if '1.14' <= mwversion < '1.17':
                     if 'edit' in user_tokens:
                         user_tokens['patrol'] = user_tokens['edit']
                 else:
@@ -3541,7 +3554,7 @@ class APISite(BaseSite):
                         if 'patroltoken' in item:
                             user_tokens['patrol'] = item['patroltoken']
         else:
-            if _version < MediaWikiVersion('1.24wmf19'):
+            if mwversion < '1.24wmf19':
                 if all is not False:
                     types_wiki = self._paraminfo.parameter('tokens',
                                                            'type')['type']
@@ -3904,8 +3917,7 @@ class APISite(BaseSite):
             member_type = {member_type}
 
         if (member_type and
-                (sortby == 'timestamp' or
-                 MediaWikiVersion(self.version()) < MediaWikiVersion("1.12"))):
+                (sortby == 'timestamp' or self.mwversion() < '1.12')):
             # Retrofit cmtype/member_type, available on MW API 1.12+,
             # to use namespaces available on earlier versions.
 
@@ -3963,7 +3975,7 @@ class APISite(BaseSite):
             raise ValueError("categorymembers: "
                              "invalid combination of 'sortby' and 'endtime'")
         if startprefix and sortby != 'timestamp':
-            if self.version() < MediaWikiVersion('1.18'):
+            if self.mwversion() < '1.18':
                 raise NotImplementedError(
                     'categorymembers: "startprefix" requires MW 1.18+')
             cmargs['gcmstartsortkeyprefix'] = startprefix
@@ -3976,7 +3988,7 @@ class APISite(BaseSite):
             raise ValueError("categorymembers: "
                              "invalid combination of 'sortby' and 'startsort'")
         if endprefix and sortby != 'timestamp':
-            if self.version() < MediaWikiVersion('1.18'):
+            if self.mwversion() < '1.18':
                 raise NotImplementedError(
                     'categorymembers: "endprefix" requires MW 1.18+')
             cmargs['cmendsortkeyprefix'] = endprefix
@@ -4069,13 +4081,13 @@ class APISite(BaseSite):
         rvargs = {'type_arg': 'info|revisions'}
 
         rvargs['rvprop'] = ['ids', 'timestamp', 'flags', 'comment', 'user']
-        if self.version() >= MediaWikiVersion('1.32'):
+        if self.mwversion() >= '1.32':
             rvargs['rvslots'] = '*'
             # 'roles' is not implemented in Revision class yet.
             # rvargs['rvprop'].append('roles')
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.21'):
+        if self.mwversion() >= '1.21':
             rvargs['rvprop'].append('contentmodel')
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.19'):
+        if self.mwversion() >= '1.19':
             rvargs['rvprop'].append('sha1')
         if content:
             rvargs['rvprop'].append('content')
@@ -4489,7 +4501,7 @@ class APISite(BaseSite):
                                 total=total)
         bkgen.request['bkprop'] = ['id', 'user', 'by', 'timestamp', 'expiry',
                                    'reason', 'range', 'flags']
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.18'):
+        if self.mwversion() >= '1.18':
             bkgen.request['bkprop'] += ['userid']
         if starttime:
             bkgen.request["bkstart"] = starttime
@@ -4729,7 +4741,7 @@ class APISite(BaseSite):
         if reverse:
             rcgen.request["rcdir"] = "newer"
         if pagelist:
-            if MediaWikiVersion(self.version()) > MediaWikiVersion("1.14"):
+            if self.mwversion() > '1.14':
                 pywikibot.warning(
                     u"recentchanges: pagelist option is disabled; ignoring.")
             else:
@@ -4783,7 +4795,7 @@ class APISite(BaseSite):
             type such as NoneType or bool
         """
         where_types = ['text', 'title', 'titles']
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.17'):
+        if self.mwversion() >= '1.17':
             where_types.append('nearmatch')
         if not searchstring:
             raise Error("search: searchstring cannot be empty")
@@ -4803,7 +4815,7 @@ class APISite(BaseSite):
                     issue_deprecation_warning("where='titles'",
                                               "where='title'", 2,
                                               since='20160224')
-                if MediaWikiVersion(self.version()) < MediaWikiVersion('1.11'):
+                if self.mwversion() < '1.11':
                     where = 'titles'
                 else:
                     where = 'title'
@@ -4813,7 +4825,7 @@ class APISite(BaseSite):
                                 gsrsearch=searchstring, gsrwhat=where,
                                 namespaces=namespaces,
                                 total=total, g_content=content)
-        if MediaWikiVersion(self.version()) < MediaWikiVersion('1.23'):
+        if self.mwversion() < '1.23':
             srgen.request['gsrredirects'] = get_redirects
         return srgen
 
@@ -4987,9 +4999,9 @@ class APISite(BaseSite):
         """
         usprop = ['blockinfo', 'groups', 'editcount', 'registration',
                   'emailable']
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.16'):
+        if self.mwversion() >= '1.16':
             usprop.append('gender')
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.17'):
+        if self.mwversion() >= '1.17':
             usprop.append('rights')
         usgen = api.ListGenerator(
             'users', site=self, parameters={
@@ -5044,11 +5056,11 @@ class APISite(BaseSite):
         redirects = mapping[redirects]
         params = {}
         if redirects is not None:
-            if MediaWikiVersion(self.version()) < MediaWikiVersion('1.26'):
+            if self.mwversion() < '1.26':
                 if redirects == 'all':
                     warn("parameter redirects=None to retrieve 'all' random"
                          'page types is not supported by mw version {0}. '
-                         'Using default.'.format(self.version()),
+                         'Using default.'.format(self.mwversion()),
                          UserWarning)
                 params['grnredirect'] = redirects == 'redirects'
             else:
@@ -5182,7 +5194,7 @@ class APISite(BaseSite):
 
         watch_items = {'watch', 'unwatch', 'preferences', 'nochange'}
         if watch in watch_items:
-            if MediaWikiVersion(self.version()) < MediaWikiVersion("1.16"):
+            if self.mwversion() < '1.16':
                 if watch in ['preferences', 'nochange']:
                     pywikibot.warning(u'The watch value {0} is not supported '
                                       'by {1}'.format(watch, self))
@@ -5329,8 +5341,7 @@ class APISite(BaseSite):
         @type reason: str
         """
         # Check wiki version to see if action=mergehistory is supported
-        min_version = MediaWikiVersion('1.27.0-wmf.13')
-        if MediaWikiVersion(self.version()) < min_version:
+        if self.mwversion() < '1.27.0-wmf.13':
             raise FatalServerError(str(self) + ' version must be '
                                    '1.27.0-wmf.13 or newer to support the '
                                    'history merge API.')
@@ -5811,8 +5822,7 @@ class APISite(BaseSite):
         revision = revision or set()
 
         # TODO: remove exeception for mw < 1.22
-        if (revid or revision) and MediaWikiVersion(
-                self.version()) < MediaWikiVersion("1.22"):
+        if (revid or revision) and self.mwversion() < '1.22':
             raise NotImplementedError(
                 u'Support of "revid" parameter\n'
                 u'is not implemented in MediaWiki version < "1.22"')
@@ -5940,7 +5950,7 @@ class APISite(BaseSite):
                       'token': self.tokens['watch'],
                       'unwatch': unwatch}
         unwatch = 'unwatched' if unwatch else 'watched'
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.23'):
+        if self.mwversion() >= '1.23':
             parameters['titles'] = pages
             req = self._simple_request(**parameters)
             results = req.submit()
@@ -6058,7 +6068,7 @@ class APISite(BaseSite):
         upload action.
 
         """
-        if MediaWikiVersion(self.version()) >= MediaWikiVersion('1.27wmf9'):
+        if self.mwversion() >= '1.27wmf9':
             return not self._siteinfo.get('general')['uploadsenabled']
         if hasattr(self, '_uploaddisabled'):
             return self._uploaddisabled
@@ -6299,8 +6309,7 @@ class APISite(BaseSite):
             throttle = True
             filesize = os.path.getsize(source_filename)
             chunked_upload = (chunk_size > 0 and chunk_size < filesize and
-                              MediaWikiVersion(
-                                  self.version()) >= MediaWikiVersion('1.20'))
+                              self.mwversion() >= '1.20')
             with open(source_filename, 'rb') as f:
                 final_request = self._request(
                     throttle=throttle, parameters={
@@ -6824,7 +6833,7 @@ class APISite(BaseSite):
         assert 'create' in self.protection_types(), \
             "'create' should be a valid protection type."
         if type == 'create':
-            if MediaWikiVersion(self.version()) < MediaWikiVersion('1.15'):
+            if self.mwversion() < '1.15':
                 raise NotImplementedError(
                     'protectedpages(type=create) requires MW 1.15+')
 

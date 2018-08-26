@@ -1110,7 +1110,7 @@ class BasePage(UnicodeMixin, ComparableMixin):
         @rtype: set
         """
         # New API since commit 32083235eb332c419df2063cf966b3400be7ee8a
-        if MediaWikiVersion(self.site.version()) >= MediaWikiVersion('1.25wmf14'):
+        if self.site.mwversion() >= '1.25wmf14':
             self.site.loadpageinfo(self)
             return self._applicable_protections
 

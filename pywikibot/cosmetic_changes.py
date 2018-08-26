@@ -401,8 +401,8 @@ class CosmeticChangesToolkit(object):
             # a clone is needed. Won't change the namespace dict
             namespaces = list(namespace)
             if namespace == 6 and self.site.family.name == 'wikipedia':
-                if self.site.code in ('en', 'fr') and MediaWikiVersion(
-                        self.site.version()) >= MediaWikiVersion('1.14'):
+                if self.site.code in ('en', 'fr') \
+                        and self.site.mwversion() >= '1.14':
                     # do not change "Image" on en-wiki and fr-wiki
                     assert u'Image' in namespaces
                     namespaces.remove(u'Image')
