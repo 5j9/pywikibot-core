@@ -14,6 +14,8 @@ environment:
 
     PYSETUP_TEST_EXTRAS: "1"
 
+    APPVEYOR_CACHE_SKIP_RESTORE: "true"
+
   matrix:
 
     # Test the lowest supported release of each major Python version.
@@ -105,6 +107,3 @@ on_failure:
 
 on_success:
   - codecov
-
-artifacts:
-  - path: dist\*  .coverage coverage.xml

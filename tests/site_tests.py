@@ -1097,6 +1097,8 @@ class TestSiteGenerators(DefaultSiteTestCase):
         """Test site.unconnected_pages method."""
         if not self.site.data_repository():
             raise unittest.SkipTest('Site is not using a Wikibase repository')
+        from pprint import pprint
+        pprint(self.site.siteinfo['extensions'])
         upgen = self.site.unconnected_pages(total=3)
         self.assertDictEqual(
             upgen.request._params, {

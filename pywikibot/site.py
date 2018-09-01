@@ -1637,7 +1637,7 @@ class Siteinfo(Container):
 
         @param key: The name of the siteinfo property.
         @type key: str
-        @param get_default: Whether to throw an KeyError if the key is invalid.
+        @param get_default: Whether to throw a KeyError if the key is invalid.
         @type get_default: bool
         @param cache: Caches the result interally so that future accesses via
             this method won't query the server.
