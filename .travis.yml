@@ -52,9 +52,8 @@ before_script:
   - pip install -r dev-requirements.txt
 
 script:
-  # Install security packages for requests to support HTTPS in site_detect
   - if [[ "$PYSETUP_TEST_EXTRAS" != '1' ]]; then
-      pip install -e .[mwoauth,security];
+      pip install -e .[mwoauth];
     fi
 
   - mkdir ~/.pywikibot
@@ -67,7 +66,8 @@ script:
       python -m generate_family_file 'http://'$LANGUAGE'.wikisource.beta.wmflabs.org/' 'wsbeta' 'y' ;
     fi
 
-  - python -W error::UserWarning -m generate_user_files -dir:~/.pywikibot/ -family:$FAMILY -lang:$LANGUAGE -v -user:"$PYWIKIBOT_USERNAME"
+  # the warning ignore option is only used for python 2.7_with_system_site_packages trusty job
+  - python -W error::UserWarning -W "ignore:Support for your Python version is deprecated." -m generate_user_files -dir:~/.pywikibot/ -family:$FAMILY -lang:$LANGUAGE -v -user:"$PYWIKIBOT_USERNAME"
 
   - if [[ -n "$USER_PASSWORD" && -n "$PYWIKIBOT_USERNAME" ]]; then
       printf "usernames['wikipedia']['en'] = '%q'\n" "$PYWIKIBOT_USERNAME" >> ~/.pywikibot/user-config.py ;

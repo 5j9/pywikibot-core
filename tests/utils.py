@@ -637,6 +637,13 @@ def execute(command, data_in=None, timeout=0, error=None):
     @param command: executable to run and arguments to use
     @type command: list of unicode
     """
+    if PYTHON_VERSION[:3] <= (2, 7, 9):
+        command[1:1] = (
+            '-W',  # CryptographyDeprecationWarning
+            'ignore:Support for your Python version is deprecated. '
+            'The next version of cryptography will remove support. '
+            'Please upgrade to a 2.7.x release that supports '
+            'hmac.compare_digest as soon as possible.')
     if PYTHON_VERSION[:2] == (2, 7) and PYTHON_VERSION[2] in (2, 3):
         command.insert(1, '-W ignore:{0}:DeprecationWarning'.format(
             'Pywikibot will soon drop support for Python 2.7.2 and 2.7.3, '

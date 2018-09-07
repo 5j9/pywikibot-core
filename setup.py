@@ -56,7 +56,6 @@ extra_deps = {
     'IRC': ['irc'],
     'mwparserfromhell': ['mwparserfromhell>=0.3.3'],
     'Tkinter': ['Pillow'],
-    'security': ['requests[security]', 'pycparser!=2.14'],
     'mwoauth': ['mwoauth>=0.2.4,!=0.3.1'],
     'html': ['BeautifulSoup4'],
     'flake8': [  # Due to incompatibilities between packages the order matters.
@@ -131,15 +130,6 @@ if PY2:
     if PYTHON_VERSION == (2, 7, 2):
         dependencies.append('future>=0.15.0')  # Bug fixes for HTMLParser
 
-    if PYTHON_VERSION < (2, 7, 9):
-        # Python versions before 2.7.9 will cause urllib3 to trigger
-        # InsecurePlatformWarning warnings for all HTTPS requests. By
-        # installing with security extras, requests will automatically set
-        # them up and the warnings will stop. See
-        # <https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning>
-        # for more details.
-        dependencies += extra_deps['security']
-
     script_deps['data_ingestion.py'] = extra_deps['csv']
 
 try:
@@ -172,11 +162,6 @@ if 'PYSETUP_TEST_EXTRAS' in os.environ:
     test_deps += [i for k, v in extra_deps.items() if k != 'flake8' for i in v]
     if 'oursql' in test_deps and os.name == 'nt':
         test_deps.remove('oursql')  # depends on Cython
-
-    if 'requests[security]' in test_deps:
-        # Bug T105767 on Python 2.7 release 9+
-        if PY2 and PYTHON_VERSION[2] >= 9:
-            test_deps.remove('requests[security]')
 
 # These extra dependencies are needed other unittest fails to load tests.
 if PY2:
