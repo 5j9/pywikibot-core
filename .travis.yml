@@ -52,9 +52,8 @@ before_script:
   - pip install -r dev-requirements.txt
 
 script:
-  # Install security packages for requests to support HTTPS in site_detect
   - if [[ "$PYSETUP_TEST_EXTRAS" != '1' ]]; then
-      pip install -e .[mwoauth,security];
+      pip install -e .[mwoauth];
     fi
 
   - mkdir ~/.pywikibot
@@ -131,7 +130,7 @@ matrix:
   include:
     - python: '2.7_with_system_site_packages'
       env: LANGUAGE=nb FAMILY=wikipedia DIST=trusty PYSETUP_TEST_EXTRAS=1 PYWIKIBOT_TEST_NO_RC=1
-      dist: trusty
+      dist: xenial
       sudo: required
       addons:
         apt:
