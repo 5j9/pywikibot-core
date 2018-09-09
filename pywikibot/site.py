@@ -4802,7 +4802,7 @@ class APISite(BaseSite):
         if where not in where_types:
             raise Error("search: unrecognized 'where' value: %s" % where)
         if where in ('title', 'titles'):
-            if isinstance(self.family, WikimediaFamily):
+            if self.has_extension('CirrusSearch'):
                 # 'title' search was disabled, use intitle instead
                 searchstring = 'intitle:' + searchstring
                 issue_deprecation_warning(
