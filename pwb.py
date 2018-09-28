@@ -152,7 +152,7 @@ try:
     import requests
 except ImportError as e:
     raise ImportError("{0}\nPython module 'requests' is required.\n"
-                      "Try running 'pip install requests'.".format(e))
+                      "Try running 'pip install .[requests]'.".format(e))
 del requests
 
 if len(sys.argv) > 1 and sys.argv[1][0] != '-':

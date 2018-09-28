@@ -44,71 +44,228 @@ def python_is_supported():
 if not python_is_supported():
     raise RuntimeError(versions_required_message.format(version=sys.version))
 
-test_deps = ['bz2file', 'mock']
+# ============
+# Dependencies
+# ============
+# It is good practise to install packages using the system
+# package manager if it has a packaged version. If you are unsure,
+# please use pip.
+#
+# To get a list of potential matches, on some Linux distributions
+# you can use:
+#
+# $ awk -F '[#>=]' '{print $1}' setup.py | xargs yum search
+#     or
+# $ awk -F '[#>=]' '{print $1}' setup.py | xargs apt-cache search
+#
+# Some dependencies can be found also in tox.ini.
 
-dependencies = ['requests>=2.9,!=2.18.2']
-
+# Extra dependencies
+# ==================
+# Core library dependencies.
+#
+# Extra dependencies can be installed using
+# $ pip install -e .[extras]
+#
+# It is organised so that simple requirements are processed first,
+# and more difficult packages are last. All dependencies
+# other than requests are optional.
 extra_deps = {
-    # Core library dependencies
-    'eventstreams': ['sseclient>=0.0.18'],
-    'isbn': ['python-stdnum'],
-    'Graphviz': ['pydot>=1.0.28'],
-    'Google': ['google>=1.7'],
-    'IRC': ['irc'],
-    'mwparserfromhell': ['mwparserfromhell>=0.3.3'],
-    'Tkinter': ['Pillow'],
-    'security': ['requests[security]', 'pycparser!=2.14'],
-    'mwoauth': ['mwoauth>=0.2.4,!=0.3.1'],
-    'html': ['BeautifulSoup4'],
-    'flake8': [  # Due to incompatibilities between packages the order matters.
-        'flake8>=3.0.2',
+    'requests': ['requests >= 2.9, != 2.18.2'],
+    # requests security extra
+    'security': ['requests[security]', 'pycparser != 2.14'],
+    # OAuth support
+    # mwoauth 0.2.4 is needed because it supports getting identity
+    # information about the user.
+    'mwoauth': ['mwoauth >= 0.2.4, != 0.3.1'],
+    'pydot': ['pydot >= 1.0.28'],
+    # csv is needed other unittest fails to load tests
+    'csv': ['unicodecsv; python_version < "3"'],
+    'stdnum': ['python-stdnum'],
+    'pillow': ['Pillow'],
+    'google': ['google >= 1.7'],
+    'sseclient': ['sseclient >= 0.0.18'],
+    # for incomplete component botirc
+    'irc': ['irc'],
+    'mwparserfromhell': ['mwparserfromhell >= 0.3.3'],
+    # The MySQL generator in pagegenerators depends on either PyMySQL
+    # or MySQLdb. Pywikibot prefers PyMySQL
+    # over MySQLdb (Python 2 only).
+    'mysql': ['PyMySQL'],
+    # HTML comparison parser in diff module
+    'beautifulsoup': ['BeautifulSoup4']
+}
+
+# Scripts dependencies
+# ====================
+# Scripts dependencies can be installed using
+# $ pip install -e .[scripts]
+scripts_deps = {
+    'data_ingestion': extra_deps['csv'],
+    'flickrripper': ['flickrapi'] + extra_deps['pillow'],
+    'imageharvest': extra_deps['beautifulsoup'],
+    'isbn': extra_deps['stdnum'],
+    'match_images': extra_deps['pillow'],
+    'patrol': extra_deps['mwparserfromhell'],
+    'script_wui': ['crontab'] + extra_deps['irc'],
+    'states_redirect': ['pycountry'],
+    'weblinkchecker': ['memento_client >= 0.5.1, != 0.6.0']
+}
+extra_deps.update(scripts_deps)
+extra_deps_list = [i for k, v in extra_deps.items() for i in v]
+extra_deps.update({'extras': extra_deps_list})
+extra_deps.update({'scripts': [i for k, v in scripts_deps.items() for i in v]})
+
+
+# Mandatory dependencies
+# ======================
+dependencies = [
+    # bug fixes for HTMLParser
+    'future >= 0.15; python_full_version == "2.7.2"',
+    # tools.ip does not have a hard dependency on an IP address module,
+    # as it falls back to using regexes if one is not available.
+    # The functional backport of py3 ipaddress is acceptable:
+    # https://pypi.org/project/ipaddress
+    # However the Debian package python-ipaddr is also supported:
+    # https://pypi.org/project/ipaddr
+    # Other backports are likely broken.
+    # ipaddr 2.1.10+ is distributed with Debian and Fedora. See T105443.
+    'ipaddr >= 2.1.10; python_version < "3"'
+]
+# requests is mandatory; see README.conversion.txt
+dependencies += extra_deps['requests']
+
+# Python versions before 2.7.9 will cause urllib3 to trigger
+# InsecurePlatformWarning warnings for all HTTPS requests.
+# By installing with security extras, requests will automatically
+# set them up and the warnings will stop. See
+# <https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning>
+# for more details. There is no secure version of cryptography
+# for Python 2.7.6 or older. See also bug T105767
+# on Python 2.7 release 9+.
+dependencies += [dep + '; python_full_version > "2.7.6" '
+                 'and python_full_version < "2.7.9"'
+                 for dep in extra_deps['security']]
+
+# Pywikibot prefers using the inbuilt bz2 module if Python was compiled
+# with bz2 support. But if it wasn't, bz2file is used instead.
+try:
+    import bz2
+except ImportError:
+    # Use bz2file if the Python is not compiled with bz2 support.
+    dependencies.append('bz2file')
+else:
+    _unused = bz2
+
+
+# Development dependencies
+# ========================
+# Development dependencies can be installed using
+# $ pip install -e .[devel]
+devel_deps = {
+    'unittest2': ['unittest2 == 0.8.0; python_full_version == "2.7.2"'],
+    'pytest': [
+        'pytest >= 3.6',
+        'pytest-timeout',
+        'pytest-runner',
+        'pytest-cov',
+        'pytest-attrib >= 0.1.3',
+        'pytest-httpbin'
+    ],
+    'nose': ['nose'],
+    # six is needed other unittest fails to load tests
+    'six': ['six; python_version >= "3"'],
+    'mock': ['mock; python_version < "3"'],
+    'nose-detecthttp': ['nose-detecthttp >= 0.1.3'],
+    'nosetrim': ['nosetrim'],
+    'pep257': ['pep257 >= 0.6'],
+    'pyflakes': ['pyflakes >= 1.1'],
+    'flake8': [  # due to incompatibilities between packages the order matters
+        'flake8 >= 3.0.2',
         'pydocstyle',
         'hacking',
         'flake8-coding',
         'flake8-comprehensions',
-        'flake8-docstrings>=1.1.0',
+        'flake8-docstrings >= 1.1',
         'flake8-future-import',
         'flake8-invalid-escape-sequences',
-        'flake8-mock>=0.3',
+        'flake8-mock >= 0.3',
         'flake8-per-file-ignores',
-        'flake8-print>=2.0.1',
+        'flake8-print >= 2.0.1',
         'flake8-quotes',
         'flake8-string-format',
-        'flake8-tuple>=0.2.8',
-        'pep8-naming>=0.7',
-        'pyflakes>=1.1',
-    ]
+        'flake8-tuple >= 0.2.8',
+        'pep8-naming >= 0.7'
+    ],
+    'coverage': ['codecov', 'coverage'],
+    'unidiff': ['unidiff']
+}
+devel_deps.update({'devel': [i for k, v in devel_deps.items() for i in v]})
+
+
+# Tox dependencies
+# ================
+tox_deps = {
+    # diff-checker
+    'diff-checker': devel_deps['unidiff'],
+    # pyflakes
+    'pyflakes': ['findx >= 0.9.9'] + devel_deps['pyflakes'],
+    # flake8
+    'flake8': devel_deps['flake8'] + devel_deps['pyflakes'],
+    # nose
+    'nose': (devel_deps['nose'] + devel_deps['nose-detecthttp']
+             + extra_deps['csv'] + devel_deps['mock']),
+    # nose34
+    'nose34': (extra_deps['mwparserfromhell'] + extra_deps['beautifulsoup']
+               + devel_deps['nose'] + devel_deps['nose-detecthttp']
+               + devel_deps['six'] + devel_deps['mock']),
+    # doctest
+    'doctest': devel_deps['nose'] + devel_deps['six'],
+    # doc
+    'docs': extra_deps['scripts'] + devel_deps['unidiff'] + extra_deps['mysql']
 }
 
-if PY2:
-    # Additional core library dependencies which are only available on Python 2
-    extra_deps.update({
-        'csv': ['unicodecsv'],
-        'MySQL': ['oursql'],
-    })
 
-script_deps = {
-    'flickrripper.py': ['flickrapi', 'Pillow'],
-    'states_redirect.py': ['pycountry'],
-    'weblinkchecker.py': ['memento_client>=0.5.1,!=0.6.0'],
-    'patrol.py': ['mwparserfromhell>=0.3.3'],
-}
+# Test dependencies
+# =================
+test_deps = devel_deps['mock'] + devel_deps['six'] + extra_deps['csv']
 
-# lunatic-python is only available for Linux
-if sys.platform.startswith('linux'):
-    script_deps['script_wui.py'] = ['irc', 'lunatic-python', 'crontab']
+# pywinauto >= 0.4.2 which depends on pywin32 are Win32 UI
+# test dependencies that are quite expensive to install,
+# and they are not useful on the Appveyor Win32 builds
+# since the relevant ui_tests also require accessing the menu
+# of the console window to set the console font and copy and paste,
+# which doesn't exist in the Appveyor environment.
+# These tests may be disabled also because pywin32 depends on VC++.
+# Microsoft makes available a compiler for Python 2.7:
+# http://www.microsoft.com/en-au/download/details.aspx?id=44266
+if os.name == 'nt' and os.environ.get('PYSETUP_TEST_NO_UI', '0') != '1':
+    test_deps += ['pywin32', 'pywinauto >= 0.4.2']
 
-# The main pywin32 repository contains a Python 2 only setup.py with a small
-# wrapper setup3.py for Python 3.
+# Add all dependencies as test dependencies, so all scripts
+# can be compiled for script_tests, etc.
+if 'PYSETUP_TEST_EXTRAS' in os.environ:
+    test_deps += extra_deps_list.remove('requests[security]')
+
+
+extra_deps.update(devel_deps)
+extra_deps.update(tox_deps)
+
+
+# Dependency links
+# ================
+# The main pywin32 repository contains a Python 2 only setup.py
+# with a small wrapper setup3.py for Python 3.
 # http://pywin32.hg.sourceforge.net:8000/hgroot/pywin32/pywin32
-# The main pywinauto repository doesnt support Python 3.
-# The repositories used below have a Python 3 compliant setup.py
+# The main pywinauto repository doesn't support Python 3.
+# The repositories used below have a Python 3 compliant setup.py.
 dependency_links = [
-    'git+https://github.com/AlereDevices/lunatic-python.git#egg=lunatic-python',
+    'git+https://github.com/nlhepler/pydot#egg=pydot',
+    'git+https://github.com/jayvdb/nosetrim@py3#egg=nosetrim',
     'hg+https://bitbucket.org/TJG/pywin32#egg=pywin32',
-    'git+https://github.com/vasily-v-ryabov/pywinauto-64#egg=pywinauto',
-    'git+https://github.com/nlhepler/pydot#egg=pydot-1.0.29',
+    'git+https://github.com/vasily-v-ryabov/pywinauto-64#egg=pywinauto'
 ]
+
 
 if PYTHON_VERSION == (2, 7, 2):
     # work around distutils hardcoded unittest dependency
@@ -119,77 +276,9 @@ if PYTHON_VERSION == (2, 7, 2):
         import unittest2
         sys.modules['unittest'] = unittest2
 
-if PY2:
-    # tools.ip does not have a hard dependency on an IP address module,
-    # as it falls back to using regexes if one is not available.
-    # The functional backport of py3 ipaddress is acceptable:
-    # https://pypi.org/project/ipaddress
-    # However the Debian package python-ipaddr is also supported:
-    # https://pypi.org/project/ipaddr
-    # Other backports are likely broken.
-    # ipaddr 2.1.10+ is distributed with Debian and Fedora. See T105443.
-    dependencies.append('ipaddr>=2.1.10')
-
-    if PYTHON_VERSION == (2, 7, 2):
-        dependencies.append('future>=0.15.0')  # Bug fixes for HTMLParser
-
-    if (2, 7, 6) < PYTHON_VERSION < (2, 7, 9):
-        # Python versions before 2.7.9 will cause urllib3 to trigger
-        # InsecurePlatformWarning warnings for all HTTPS requests. By
-        # installing with security extras, requests will automatically set
-        # them up and the warnings will stop. See
-        # <https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning>
-        # for more details.
-        # There is no secure version of cryptography for Python 2.7.6 or older.
-        dependencies += extra_deps['security']
-
-    script_deps['data_ingestion.py'] = extra_deps['csv']
-
-try:
-    import bz2
-except ImportError:
-    # Use bz2file if the python is not compiled with bz2 support.
-    dependencies.append('bz2file')
-else:
-    _unused = bz2
-
-
-# Some of the ui_tests depend on accessing the console window's menu
-# to set the console font and copy and paste, achieved using pywinauto
-# which depends on pywin32.
-# These tests may be disabled because pywin32 depends on VC++, is time
-# comsuming to build, and the console window cant be accessed during appveyor
-# builds.
-# Microsoft makes available a compiler for Python 2.7
-# http://www.microsoft.com/en-au/download/details.aspx?id=44266
-if os.name == 'nt' and os.environ.get('PYSETUP_TEST_NO_UI', '0') != '1':
-    # FIXME: tests/ui_tests.py suggests pywinauto 0.4.2
-    # which isnt provided on pypi.
-    test_deps += ['pywin32', 'pywinauto>=0.4.0']
-
-extra_deps.update(script_deps)
-
-# Add all dependencies as test dependencies,
-# so all scripts can be compiled for script_tests, etc.
-if 'PYSETUP_TEST_EXTRAS' in os.environ:
-    test_deps += [i for k, v in extra_deps.items() if k != 'flake8' for i in v]
-    if 'oursql' in test_deps and os.name == 'nt':
-        test_deps.remove('oursql')  # depends on Cython
-
-    if 'requests[security]' in test_deps:
-        # Bug T105767 on Python 2.7 release 9+
-        if PY2 and PYTHON_VERSION[2] >= 9:
-            test_deps.remove('requests[security]')
-
-# These extra dependencies are needed other unittest fails to load tests.
-if PY2:
-    test_deps += extra_deps['csv']
-else:
-    test_deps += ['six']
-
 
 def get_version():
-    """Get a valid pywikibot module version string."""
+    """Get a valid Pywikibot module version string."""
     version = '3.0'
     try:
         import subprocess

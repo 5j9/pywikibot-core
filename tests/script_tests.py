@@ -27,19 +27,17 @@ archive_path = join_root_path('scripts', 'archive')
 # Here, it doesnt matter which pypi package was requested and installed.
 # Here, the name given to the module which will be imported is required.
 script_deps = {
-    'script_wui': ['crontab', 'lua'],
-    # Note: package 'lunatic-python' provides module 'lua'
+    'data_ingestion': ['unicodecsv; python_version < "3"'],
     'flickrripper': ['flickrapi', 'Pillow'],
     'imageharvest': ['bs4'],
     'isbn': ['python-stdnum'],
     'match_images': ['PIL.ImageTk'],
+    'patrol': ['mwparserfromhell >= 0.3.3'],
+    # Note: package 'lunatic-python' provides module 'lua'
+    'script_wui': ['crontab', 'irc', 'lua'],
     'states_redirect': ['pycountry'],
-    'patrol': ['mwparserfromhell>=0.3.3'],
-    'weblinkchecker': ['memento_client>=0.5.1,!=0.6.0'],
+    'weblinkchecker': ['memento_client >= 0.5.1, != 0.6.0']
 }
-
-if PY2:
-    script_deps['data_ingestion'] = ['unicodecsv']
 
 
 def check_script_deps(script_name):
@@ -376,6 +374,7 @@ class TestScriptHelp(PwbTestCase):
 
     _expected_failures = failed_dep_script_set
     # -help tests may pass even when packages are required
+    _expected_failures.discard('data_ingestion')
     _expected_failures.discard('imageharvest')
     _expected_failures.discard('isbn')
     _expected_failures.discard('weblinkchecker')

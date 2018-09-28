@@ -4,6 +4,7 @@ Release history
 Current release
 ---------------
 
+* Get rid of requirements files and merge their content into setup.py (T193476)
 * Enable start timestamp for EventStreams (T205121)
 * Re-enable notifications (T205184)
 * Use FutureWarning for warnings intended for end users (T191192)

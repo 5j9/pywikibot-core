@@ -11,7 +11,7 @@ Specific arguments:
 
 PRE-REQUISITE : Need to install python-pycountry library.
 * Follow the instructions at: https://www.versioneye.com/python/pycountry/0.16
-* Install with pip: pip install pycountry
+* Install with pip: pip install -e .[states_redirect]
 """
 #
 # (C) Andre Engels, 2004

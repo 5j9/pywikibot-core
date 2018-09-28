@@ -5,7 +5,7 @@ Server-Sent Events client.
 This file is part of the Pywikibot framework.
 
 This module requires sseclient to be installed:
-    pip install sseclient
+    pip install -e .[sseclient]
 """
 #
 # (C) xqt, 2017-2018
@@ -36,7 +36,7 @@ from pywikibot.tools import deprecated_args, StringTypes
 if LooseVersion(requests.__version__) < LooseVersion('2.9'):
     raise ImportError(
         'requests >= 2.9 is required for EventStreams;\n'
-        "install it with 'pip install \"requests>=2.9,!=2.18.2\"'\n")
+        "install it with 'pip install -e .[requests]'")
 
 
 _logger = 'pywikibot.eventstreams'
@@ -104,7 +104,7 @@ class EventStreams(object):
         """
         if isinstance(EventSource, Exception):
             raise ImportError('sseclient is required for EventStreams;\n'
-                              'install it with "pip install sseclient"\n')
+                              'install it with "pip install -e .[sseclient]"')
         self.filter = {'all': [], 'any': [], 'none': []}
         self._total = None
         self._site = kwargs.pop('site', Site())
@@ -295,7 +295,7 @@ class EventStreams(object):
                     warning(
                         'You may not have the right sseclient version;\n'
                         'sseclient >= 0.0.18 is required for eventstreams.\n'
-                        "Install it with 'pip install \"sseclient>=0.0.18\"'")
+                        "Install it with 'pip install -e .[sseclient]'.")
             try:
                 event = next(self.source)
             except (ProtocolError, socket.error, httplib.IncompleteRead) as e:
@@ -342,7 +342,7 @@ def site_rc_listener(site, total=None):
     """
     if isinstance(EventSource, Exception):
         raise ImportError('sseclient is required for EventStreams;\n'
-                          'install it with "pip install sseclient"\n')
+                          'install it with "pip install -e .[sseclient]"')
 
     stream = EventStreams(stream='recentchange', site=site)
     stream.set_maximum_items(total)

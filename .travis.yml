@@ -49,7 +49,7 @@ before_install:
 
 before_script:
   - pip install -U setuptools
-  - pip install -r dev-requirements.txt
+  - pip install -e .[devel]
 
 script:
   # Install security packages for requests to support HTTPS in site_detect

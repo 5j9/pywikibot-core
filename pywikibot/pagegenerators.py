@@ -65,7 +65,7 @@ _logger = 'pagegenerators'
 # most of these functions just wrap a Site or Page method that returns
 # a generator
 
-parameterHelp = """ \
+parameterHelp = """\
 GENERATOR OPTIONS
 =================
 
@@ -2751,7 +2751,7 @@ class GoogleSearchPageGenerator(object):
         except ImportError:
             pywikibot.error('ERROR: generator GoogleSearchPageGenerator '
                             "depends on package 'google'.\n"
-                            'To install, please run: pip install google.')
+                            'Install it with "pip install -e .[google]".')
             exit(1)
         pywikibot.warning('Please read http://www.google.com/accounts/TOS')
         for url in google.search(query):

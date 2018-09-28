@@ -36,7 +36,7 @@ setup.py
 
 ::
 
-    pip install pytest-runner
+    pip install -e .[pytest]
     python setup.py pytest
 
 Module unittest
