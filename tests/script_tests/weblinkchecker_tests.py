@@ -14,7 +14,7 @@ from requests import ConnectionError as RequestsConnectionError
 from pywikibot.tools import PY2
 from scripts import weblinkchecker
 from tests.aspects import unittest, require_modules, TestCase
-from tests import weblib_tests
+from tests.library_tests import weblib_tests
 
 if not PY2:
     from urllib.parse import urlparse

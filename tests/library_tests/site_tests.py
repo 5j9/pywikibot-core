@@ -43,7 +43,8 @@ from tests.aspects import (
     DefaultWikidataClientTestCase,
     AlteredDefaultSiteTestCase,
 )
-from tests.basepage_tests import BasePageLoadRevisionsCachingTestBase
+from tests.library_tests.basepage_tests import (
+    BasePageLoadRevisionsCachingTestBase,)
 from tests.utils import allowed_failure, allowed_failure_if, entered_loop
 
 if not PY2:

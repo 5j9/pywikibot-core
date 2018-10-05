@@ -191,7 +191,7 @@ def collector(loader=unittest.loader.defaultTestLoader):
               and name not in unrunnable_script_set
               ])
 
-    test_list = ['tests.script_tests.TestScriptHelp.' + name
+    test_list = ['tests.script_tests.script_tests.TestScriptHelp.' + name
                  for name in tests]
 
     tests = (['test__login'] +
@@ -203,7 +203,7 @@ def collector(loader=unittest.loader.defaultTestLoader):
               and (enable_autorun_tests or name not in auto_run_script_list)
               ])
 
-    test_list += ['tests.script_tests.TestScriptSimulate.' + name
+    test_list += ['tests.script_tests.script_tests.TestScriptSimulate.' + name
                   for name in tests]
 
     tests = loader.loadTestsFromNames(test_list)

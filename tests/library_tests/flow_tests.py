@@ -15,7 +15,7 @@ from tests import unittest
 from tests.aspects import (
     TestCase,
 )
-from tests.basepage_tests import (
+from tests.library_tests.basepage_tests import (
     BasePageMethodsTestBase,
     BasePageLoadRevisionsCachingTestBase,
 )

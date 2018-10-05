@@ -16,7 +16,7 @@ from scripts import replace
 from tests import join_data_path
 
 from tests.aspects import unittest
-from tests.bot_tests import TWNBotTestCase
+from tests.library_tests.bot_tests import TWNBotTestCase
 
 # Load only the custom fixes
 fixes.fixes.clear()

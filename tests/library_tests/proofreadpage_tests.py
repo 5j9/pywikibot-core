@@ -15,7 +15,7 @@ from pywikibot.data import api
 from pywikibot.proofreadpage import IndexPage, ProofreadPage
 
 from tests.aspects import unittest, require_modules, TestCase
-from tests.basepage_tests import (
+from tests.library_tests.basepage_tests import (
     BasePageMethodsTestBase,
     BasePageLoadRevisionsCachingTestBase,
 )

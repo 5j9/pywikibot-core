@@ -15,7 +15,7 @@ from pywikibot import config
 from pywikibot import page_put_queue
 
 from tests.aspects import unittest, TestCase
-from tests.oauth_tests import OAuthSiteTestCase
+from tests.library_tests.oauth_tests import OAuthSiteTestCase
 
 called_back = False
 

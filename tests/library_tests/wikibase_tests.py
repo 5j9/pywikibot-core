@@ -27,7 +27,7 @@ from tests.aspects import (
     DefaultWikibaseClientTestCase,
 )
 
-from tests.basepage_tests import (
+from tests.library_tests.basepage_tests import (
     BasePageMethodsTestBase,
     BasePageLoadRevisionsCachingTestBase,
 )

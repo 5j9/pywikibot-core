@@ -34,7 +34,7 @@ from tests.aspects import (
     DefaultSiteTestCase,
     RecentChangesTestCase,
 )
-from tests.thread_tests import GeneratorIntersectTestCase
+from tests.library_tests.thread_tests import GeneratorIntersectTestCase
 
 en_wp_page_titles = (
     # just a bunch of randomly selected titles for English Wikipedia tests

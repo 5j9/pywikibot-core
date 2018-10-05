@@ -28,7 +28,7 @@ from tests.aspects import (
     unittest, TestCase, DefaultDrySiteTestCase,
     WikibaseTestCase, ScriptMainTestCase,
 )
-from tests.bot_tests import TWNBotTestCase
+from tests.library_tests.bot_tests import TWNBotTestCase
 
 if StdNumValidationError:
     AnyIsbnValidationException = (StdNumValidationError, IsbnExc)

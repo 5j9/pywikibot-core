@@ -25,13 +25,12 @@ from tests.aspects import (
     unittest, require_modules, TestCase, DefaultDrySiteTestCase,
     PatchingTestCase, SiteAttributeTestCase,
 )
-from tests import mock
+from tests import join_pages_path, mock
 
 files = {}
-dirname = os.path.join(os.path.dirname(__file__), 'pages')
 
 for f in ['enwiki_help_editing']:
-    with codecs.open(os.path.join(dirname, f + '.page'),
+    with codecs.open(join_pages_path(f + '.page'),
                      'r', 'utf-8') as content:
         files[f] = content.read()
 

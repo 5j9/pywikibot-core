@@ -16,6 +16,9 @@ import functools
 import os
 import warnings
 
+from os import listdir
+from os.path import join
+
 # Verify that the unit tests have a base working environment:
 # - requests is mandatory
 #   however if unavailable this will fail on use; see pywikibot/tools.py
@@ -51,11 +54,25 @@ def join_root_path(*names):
 
 
 def create_path_func(base_func, subpath):
-    """Return a function returning a path relative to the given directory."""
+    """Return a function returning a path relative to the given directory.
+
+    @type base_func: callable
+    @type subpath: str
+    @rtype: callable
+    """
     func = functools.partial(base_func, subpath)
-    func.path = base_func.path + '/' + subpath
+    func.path = join(base_func.path, subpath)
     func.__doc__ = 'Return a path relative to `{0}/`.'.format(func.path)
     return func
+
+
+def test_modules(tests_dir=''):
+    """Return a set of test modules in the requested tests directory."""
+    prefix = tests_dir + '.' if tests_dir else ''
+    return {
+        prefix + name[:-9]  # strip '_tests.py'
+        for name in listdir(join_tests_path(tests_dir))
+        if name.endswith('_tests.py')}
 
 
 join_root_path.path = 'root'
@@ -73,120 +90,30 @@ join_html_data_path = create_path_func(join_data_path, 'html')
 # Find the root directory of the checkout
 _pwb_py = join_root_path('pwb.py')
 
-library_test_modules = [
-    'python',
-    'plural',
-    'deprecation',
-    'ui',
-    'ui_options',
-    'thread',
-    'tests',
-    'date',
-    'timestamp',
-    'mediawikiversion',
-    'tools',
-    'tools_chars',
-    'tools_ip',
-    'xmlreader',
-    'textlib',
-    'diff',
-    'http',
-    'namespace',
-    'dry_api',
-    'dry_site',
-    'api',
-    'exceptions',
-    'oauth',
-    'family',
-    'site',
-    'link',
-    'interwiki_link',
-    'interwiki_graph',
-    'basepage',
-    'page',
-    'category',
-    'file',
-    'djvu',
-    'proofreadpage',
-    'edit_failure',
-    'edit',
-    'logentry',
-    'timestripper',
-    'pagegenerators',
-    'cosmetic_changes',
-    'wikistats',
-    'weblib',
-    'i18n',
-    'tk',
-    'wikibase',
-    'wikibase_edit',
-    'flow',
-    'flow_edit',
-    'upload',
-    'site_detect',
-    'bot',
-]
-
-script_test_modules = [
-    'pwb',
-    'script',
-    'l10n',
-    'add_text',
-    'archivebot',
-    'category_bot',
-    'checkimages',
-    'data_ingestion',
-    'deletionbot',
-    'disambredir',
-    'isbn',
-    'protectbot',
-    'reflinks',
-    'template_bot',
-    'replacebot',
-    'uploadbot',
-    'weblinkchecker',
-    'cache',
-]
-
-disabled_test_modules = [
-    'tests',  # tests of the tests package
-    'l10n',
-]
-if not i18n.messages_available():
-    disabled_test_modules.append('l10n')
-
 disabled_tests = {
-    'textlib': [
+    'library_tests.textlib': [
         'test_interwiki_format',  # example; very slow test
     ],
-    'weblib': [
+    'library_tests.weblib': [
         'testWebCiteOlder',  # fails. T110640
     ],
 }
 
-
-def _unknown_test_modules():
-    """List tests which are to be executed."""
-    dir_list = os.listdir(join_tests_path())
-    all_test_list = [name[0:-9] for name in dir_list  # strip '_tests.py'
-                     if name.endswith('_tests.py')
-                     and not name.startswith('_')]   # skip __init__.py and _*
-
-    unknown_test_modules = [name
-                            for name in all_test_list
-                            if name not in library_test_modules
-                            and name not in script_test_modules]
-
-    return unknown_test_modules
-
-
-extra_test_modules = sorted(_unknown_test_modules())
-
-test_modules = library_test_modules + extra_test_modules + script_test_modules
+extra_test_modules = test_modules('')
+all_test_modules = (
+    extra_test_modules
+    | test_modules('library_tests')
+    | test_modules('script_tests'))
 
 if 'PYWIKIBOT_TEST_MODULES' in os.environ:
     _enabled_test_modules = os.environ['PYWIKIBOT_TEST_MODULES'].split(',')
-    disabled_test_modules = set(test_modules) - set(_enabled_test_modules)
+    disabled_test_modules = all_test_modules - set(_enabled_test_modules)
+else:
+    disabled_test_modules = {
+        'tests',  # tests of the tests package
+    }
+    if not i18n.messages_available():
+        disabled_test_modules.add('l10n')
 
 
 def unittest_print(*args, **kwargs):
@@ -217,9 +144,7 @@ def collector(loader=unittest.loader.defaultTestLoader):
             'Skipping tests (to run: python -m unittest ...):\n  {!r}'
             .format(disabled_tests))
 
-    modules = [module
-               for module in test_modules
-               if module not in disabled_test_modules]
+    modules = all_test_modules - disabled_test_modules
 
     test_list = []
 
