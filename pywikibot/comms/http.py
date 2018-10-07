@@ -84,7 +84,12 @@ def mode_check_decorator(func):
 # in PY2 cookielib.LWPCookieJar is not a new-style class.
 class PywikibotCookieJar(cookielib.LWPCookieJar, object):
 
-    """CookieJar which checks file permissions."""
+    """DEPRECATED. CookieJar which checks file permissions."""
+
+    @deprecated(since='20181007')
+    def __init__(self, *args, **kwargs):
+        """Initialize the class."""
+        super(PywikibotCookieJar, self).__init__(*args, **kwargs)
 
     @mode_check_decorator
     def load(self, **kwargs):
@@ -97,10 +102,12 @@ class PywikibotCookieJar(cookielib.LWPCookieJar, object):
         super(PywikibotCookieJar, self).save()
 
 
-cookie_jar = PywikibotCookieJar(config.datafilepath('pywikibot.lwp'))
+pywikibot_lwp_path = config.datafilepath('pywikibot.lwp')
+file_mode_checker(pywikibot_lwp_path, create=True)
+cookie_jar = cookielib.LWPCookieJar(pywikibot_lwp_path)
 try:
     cookie_jar.load()
-except (IOError, cookielib.LoadError):
+except cookielib.LoadError:
     debug('Loading cookies failed.', _logger)
 else:
     debug('Loaded cookies from file.', _logger)
