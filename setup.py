@@ -46,7 +46,7 @@ if not python_is_supported():
 
 test_deps = ['bz2file', 'mock']
 
-dependencies = ['requests>=2.9,!=2.18.2']
+dependencies = ['requests>=2.20.0']
 
 extra_deps = {
     # Core library dependencies
@@ -57,7 +57,7 @@ extra_deps = {
     'IRC': ['irc'],
     'mwparserfromhell': ['mwparserfromhell>=0.3.3'],
     'Tkinter': ['Pillow'],
-    'security': ['requests[security]', 'pycparser!=2.14'],
+    'security': ['requests[security]>=2.20.0', 'pycparser!=2.14'],
     'mwoauth': ['mwoauth>=0.2.4,!=0.3.1'],
     'html': ['BeautifulSoup4'],
     'flake8': [  # Due to incompatibilities between packages the order matters.
