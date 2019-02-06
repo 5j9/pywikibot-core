@@ -13,7 +13,10 @@ import os.path
 if __name__ == '__main__':
     for k, v in sorted(locals().copy().items()):
         # Skip a few items that Python 3 adds and are not emulated in pwb.
-        if k in ['__cached__', '__loader__', '__spec__', '__annotations__']:
+        if k in {
+            '__cached__', '__loader__', '__spec__', '__annotations__',
+            '__package__'
+        }:
             continue
         if k == '__file__':
             print('__file__: ' + os.path.join('.', os.path.relpath(__file__)))

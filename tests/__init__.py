@@ -71,7 +71,7 @@ join_xml_data_path = create_path_func(join_data_path, 'xml')
 join_html_data_path = create_path_func(join_data_path, 'html')
 
 # Find the root directory of the checkout
-_pwb_py = join_root_path('pwb.py')
+_pwb_py = join_root_path('pywikibot')
 
 library_test_modules = [
     'python',

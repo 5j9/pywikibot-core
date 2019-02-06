@@ -237,9 +237,12 @@ setup(
     maintainer='The Pywikibot team',
     maintainer_email='pywikibot@lists.wikimedia.org',
     license='MIT License',
-    packages=[str(name)] + [package
-                            for package in find_packages()
-                            if package.startswith('pywikibot.')],
+    packages=find_packages(
+        exclude=('tests', 'tests.*', 'scripts', 'scripts.*')
+    ),
+    entry_points={
+        'console_scripts': ['pywikibot = pywikibot.__main__:main'],
+    },
     python_requires='>=2.7.2, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
     install_requires=dependencies,
     dependency_links=dependency_links,

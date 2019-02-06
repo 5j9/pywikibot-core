@@ -751,7 +751,10 @@ def execute_pwb(args, data_in=None, timeout=0, error=None, overrides=None):
         overrides = '; '.join(
             '{} = {}'.format(key, value) for key, value in overrides.items())
         command.append(
-            'import pwb; import pywikibot; {}; pwb.main()'
+            'import pywikibot; '
+            'from pywikibot.__main__ import _main; '
+            '{}; '
+            '_main()'
             .format(overrides))
     else:
         command.append(_pwb_py)

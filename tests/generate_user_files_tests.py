@@ -11,7 +11,7 @@ import re
 
 from tests.aspects import unittest, TestCase
 
-import generate_user_files as guf
+from pywikibot._scripts import generate_user_files as guf
 
 
 class TestGenerateUserFiles(TestCase):

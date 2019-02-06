@@ -13,7 +13,7 @@ from pywikibot import Site
 
 from tests.aspects import unittest, DefaultSiteTestCase
 
-import generate_family_file
+from pywikibot._scripts import generate_family_file
 
 
 class FamilyTestGenerator(generate_family_file.FamilyFileGenerator):
