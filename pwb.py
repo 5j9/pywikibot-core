@@ -54,19 +54,16 @@ def remove_modules():
 
 
 def tryimport_pwb():
-    """Try to import pywikibot.
-
-    If so, we need to patch pwb.argvu, too.
-    If pywikibot is not available, we create a mock object to remove the
-    need for if statements further on.
-    """
+    """Try to import pywikibot."""
+    # to suppress the warning in case user-config.py is not found
     global pwb
-    try:
-        import pywikibot
-    except RuntimeError:
-        remove_modules()
-        os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '2'
-        import pywikibot
+    original_no_user_config = os.environ.get('PYWIKIBOT_NO_USER_CONFIG')
+    os.environ['PYWIKIBOT_NO_USER_CONFIG'] = '1'
+    import pywikibot
+    if original_no_user_config is None:
+        del os.environ['PYWIKIBOT_NO_USER_CONFIG']
+    else:
+        os.environ['PYWIKIBOT_NO_USER_CONFIG'] = original_no_user_config
     pwb = pywikibot
 
 
@@ -87,8 +84,6 @@ def run_python_file(filename, argv, argvu, package=None):
     `args` is the argument array to present as sys.argv, as unicode strings.
 
     """
-    tryimport_pwb()
-
     # Create a module to serve as __main__
     old_main_mod = sys.modules['__main__']
     # it's explicitly using str() to bypass unicode_literals in Python 2
@@ -165,18 +160,13 @@ else:
 # Skip the filename if one was given
 args = sys.argv[(2 if filename else 1):]
 
-# Search for user-config.py before creating one.
-try:
-    # If successful, user-config.py already exists in one of the candidate
-    # directories. See config2.py for details on search order.
-    # Use env var to communicate to config2.py pwb.py location (bug T74918).
-    _pwb_dir = os.path.split(__file__)[0]
-    if sys.platform == 'win32' and sys.version_info[0] < 3:
-        _pwb_dir = str(_pwb_dir)
-    os.environ['PYWIKIBOT_DIR_PWB'] = _pwb_dir
-    import pywikibot
-    pwb = pywikibot
-except RuntimeError:
+# Use env var to communicate to config2.py pwb.py location (bug T74918).
+_pwb_dir = os.path.split(__file__)[0]
+if sys.platform == 'win32' and sys.version_info[0] < 3:
+    _pwb_dir = str(_pwb_dir)
+os.environ['PYWIKIBOT_DIR_PWB'] = _pwb_dir
+tryimport_pwb()
+if not pwb.config.user_config_loaded:
     # user-config.py to be created
     if filename is not None and not (filename.startswith('generate_')
                                      or filename == 'version.py'):
@@ -196,7 +186,6 @@ def main():
     global filename
     if filename:
         file_package = None
-        tryimport_pwb()
         argvu = pwb.argvu[1:]
         if not os.path.exists(filename):
             script_paths = ['scripts',
