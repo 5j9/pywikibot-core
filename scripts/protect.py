@@ -159,7 +159,6 @@ def main(*args):
     """
     options = {}
     message_properties = {}
-    generator = None
     protections = {}
     default_level = 'sysop'
     default_summaries = {

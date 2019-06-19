@@ -435,7 +435,6 @@ def _get_translation(lang, twtitle):
     if twtitle in _cache[lang]:
         return _cache[lang][twtitle]
     message_bundle = twtitle.split('-')[0]
-    trans_text = None
     filename = '%s/%s.json' % (message_bundle, lang)
     try:
         trans_text = pkgutil.get_data(

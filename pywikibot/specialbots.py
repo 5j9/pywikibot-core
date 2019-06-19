@@ -422,7 +422,6 @@ class UploadRobot(BaseBot):
 
         pywikibot.output('Uploading file to {0}...'.format(site))
 
-        success = False
         ignore_warnings = self.ignoreWarning is True or self._handle_warnings
         if ('://' in file_url
                 and 'upload_by_url' not in site.userinfo['rights']):

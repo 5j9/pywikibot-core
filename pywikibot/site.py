@@ -2631,8 +2631,6 @@ class APISite(BaseSite):
 
         for nsdata in self.siteinfo.get('namespaces', cache=False).values():
             ns = nsdata.pop('id')
-            custom_name = None
-            canonical_name = None
             if ns == 0:
                 canonical_name = nsdata.pop('*')
                 custom_name = canonical_name

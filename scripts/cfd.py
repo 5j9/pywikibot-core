@@ -107,7 +107,6 @@ def main(*args):
     day = 'None'
     mode = 'None'
     summary = ''
-    action_summary = ''
     robot = None
 
     m = ReCheck()
