@@ -13,7 +13,6 @@ import os
 import re
 from subprocess import PIPE, Popen
 import sys
-import time
 import traceback
 import warnings
 
@@ -21,6 +20,7 @@ try:
     from collections.abc import Mapping
 except ImportError:  # Python 2.7
     from collections import Mapping
+    from threading import Timer
 from types import ModuleType
 
 try:
@@ -636,7 +636,7 @@ class PatchedHttp(object):
         self._module.http = self._old_http
 
 
-def execute(command, data_in=None, timeout=0, error=None):
+def execute(command, data_in=None, timeout=None, error=None):
     """
     Execute a command and capture outputs.
 
@@ -699,35 +699,22 @@ def execute(command, data_in=None, timeout=0, error=None):
         p.stdin.write(data_in.encode(config.console_encoding))
         p.stdin.flush()  # _communicate() otherwise has a broken pipe
 
-    stderr_lines = b''
-    waited = 0
-    while (error or (waited < timeout)) and p.poll() is None:
-        # In order to kill 'shell' and others early, read only a single
-        # line per second, and kill the process as soon as the expected
-        # output has been seen.
-        # Additional lines will be collected later with p.communicate()
-        if error:
-            line = p.stderr.readline()
-            stderr_lines += line
-            if error in line.decode(config.console_encoding):
-                break
-        time.sleep(1)
-        waited += 1
-
-    if (timeout or error) and p.poll() is None:
-        p.kill()
-
-    if p.poll() is not None:
-        stderr_lines += p.stderr.read()
-
-    data_out = p.communicate()
+    if PY2:
+        # The brilliant Timer idea is from sussudio's answer at
+        # https://stackoverflow.com/a/10012262/2705757
+        timer = Timer(timeout, p.kill)
+        try:
+            stdout_data, stderr_data = p.communicate()
+        finally:
+            timer.cancel()
+    else:
+        stdout_data, stderr_data = p.communicate(timeout=timeout)
     return {'exit_code': p.returncode,
-            'stdout': data_out[0].decode(config.console_encoding),
-            'stderr': (stderr_lines + data_out[1])
-            .decode(config.console_encoding)}
+            'stdout': stdout_data.decode(config.console_encoding),
+            'stderr': stderr_data.decode(config.console_encoding)}
 
 
-def execute_pwb(args, data_in=None, timeout=0, error=None, overrides=None):
+def execute_pwb(args, data_in=None, timeout=None, error=None, overrides=None):
     """
     Execute the pwb.py script and capture outputs.
 
