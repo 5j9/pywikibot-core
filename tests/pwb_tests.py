@@ -13,8 +13,8 @@ https://bitbucket.org/ned/coveragepy/src/default/tests/test_execfile.py
 #
 from __future__ import absolute_import, division, unicode_literals
 
-import io
 import sys
+from re import compile as re_compile
 
 from pywikibot.tools import PY2
 
@@ -23,6 +23,7 @@ from tests.utils import execute, execute_pwb
 from tests.aspects import unittest, PwbTestCase
 
 join_pwb_tests_path = create_path_func(join_tests_path, 'pwb')
+first_line_match = re_compile(r'\s*([^\n\r]*)').match
 
 
 class TestPwb(PwbTestCase):
@@ -80,16 +81,15 @@ class TestPwb(PwbTestCase):
 
     def test_script_found(self):
         """Test pwb.py script call which is found."""
-        stdout = io.StringIO(execute_pwb(['pwb'])['stdout'])
         self.assertEqual(
-            stdout.readline().strip(),
+            first_line_match(execute_pwb(['pwb'])['stdout']).group(0),
             "Wrapper script to use Pywikibot in 'directory' mode.")
 
     def test_script_not_found(self):
         """Test pwbot.py script call which is not found."""
-        stderr = io.StringIO(execute_pwb(['pywikibot'])['stderr'])
-        self.assertEqual(stderr.readline().strip(),
-                         'ERROR: pywikibot.py not found! Misspelling?')
+        self.assertEqual(
+            first_line_match(execute_pwb(['pywikibot'])['stderr']).group(0),
+            'ERROR: pywikibot.py not found! Misspelling?')
 
     @unittest.skipIf(PY2, 'cannot be safely tested with Python 2 (T224364)')
     def test_one_similar_script(self):
@@ -99,17 +99,17 @@ class TestPwb(PwbTestCase):
             'NOTE: Starting the most similar script shell.py',
             'in 5.0 seconds; type CTRL-C to stop.',
         ]
-        stream = execute_pwb(['hello'], data_in=chr(3), timeout=6)
-        stderr = io.StringIO(stream['stderr'])
+        stderr_lines = execute_pwb(
+            ['hello'], data_in=chr(3), timeout=6)['stderr'].splitlines()
         with self.subTest(line=0):
-            self.assertEqual(stderr.readline().strip(), result[0])
+            self.assertEqual(stderr_lines[0], result[0])
         with self.subTest(line=1):
-            text = stderr.readline().strip()
+            text = stderr_lines[1]
             self.assertTrue(
                 text.startswith(result[1]),
                 msg='"{}" does not start with "{}"'.format(text, result[1]))
         with self.subTest(line=2):
-            self.assertEqual(stderr.readline().strip(), result[2])
+            self.assertEqual(stderr_lines[2].lstrip(), result[2])
 
     def test_similar_scripts_found(self):
         """Test script call which gives multiple similar results."""
@@ -121,10 +121,11 @@ class TestPwb(PwbTestCase):
             '2 - commonscat',
             '3 - commons_link',
         ]
-        stderr = io.StringIO(execute_pwb(['commons'], data_in='q')['stderr'])
+        stderr_lines = execute_pwb(
+            ['commons'], data_in='q')['stderr'].splitlines()
         for line in range(6):
             with self.subTest(line=line):
-                self.assertEqual(stderr.readline().strip(), result[line])
+                self.assertEqual(stderr_lines[line], result[line])
 
 
 if __name__ == '__main__':  # pragma: no cover
