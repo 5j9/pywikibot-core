@@ -299,7 +299,7 @@ class DryMimeTests(TestCase):
             'file': (file_content, ('image', 'png'),
                      {'filename': local_filename})
         })[1]
-        self.assertNotEqual(body.find(file_content), -1)
+        self.assertIn(file_content, body)
 
 
 class MimeTests(DefaultDrySiteTestCase):
